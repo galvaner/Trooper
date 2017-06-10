@@ -1,0 +1,8 @@
+4ZNP_A.fasta 5BTM_A.fasta
+4ZNP_A.fasta 5BTM_B.fasta
+4ZNP_B.fasta 5BTM_A.fasta
+4ZNP_B.fasta 5BTM_B.fasta
+5BTM_A.fasta 4ZNP_A.fasta
+5BTM_A.fasta 4ZNP_B.fasta
+5BTM_B.fasta 4ZNP_A.fasta
+5BTM_B.fasta 4ZNP_B.fasta

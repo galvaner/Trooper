@@ -1,0 +1,46 @@
+########################################
+# Program: needle
+# Rundate: Wed 12 Apr 2017 00:44:54
+# Commandline: needle
+#    -outfile ../prediction/3V7E_C_2YDH_A/files/emboss.aln
+#    -asequence ../fastas/3V7E_C.fasta
+#    -bsequence ../fastas/2YDH_A.fasta
+#    -gapopen 10
+#    -gapextend 0.5
+# Align_format: srspair
+# Report_file: ../prediction/3V7E_C_2YDH_A/files/emboss.aln
+########################################
+
+#=======================================
+#
+# Aligned_sequences: 2
+# 1: SEQUENCE
+# 2: SEQUENCE
+# Matrix: EDNAFULL
+# Gap_penalty: 10.0
+# Extend_penalty: 0.5
+#
+# Length: 126
+# Identity:      89/126 (70.6%)
+# Similarity:    89/126 (70.6%)
+# Gaps:          32/126 (25.4%)
+# Score: 390.0
+# 
+#
+#=======================================
+
+SEQUENCE           1 GGCUUAUCAAGAGAGGUGGAGGGACUGGCCCGAUGAAACCCGGCAACCAC     50
+                     |||||||||||||||||..||||||||||||||.||||||||||||||| 
+SEQUENCE           1 GGCUUAUCAAGAGAGGUUUAGGGACUGGCCCGACGAAACCCGGCAACCA-     49
+
+SEQUENCE          51 UAGUCUAGCGUCAGCUUCGGCUGACGCUAGGCUAGUGGUGCCAAUUCCUG    100
+                                           ||         |.|||||||||||||||
+SEQUENCE          50 ----------------------GA---------AAUGGUGCCAAUUCCUG     68
+
+SEQUENCE         101 CAGCGGAAACGUUGAAAGAUGAGCCA    126
+                     |||||||||||||||||||||||||.
+SEQUENCE          69 CAGCGGAAACGUUGAAAGAUGAGCCG     94
+
+
+#---------------------------------------
+#---------------------------------------

@@ -1,0 +1,54 @@
+########################################
+# Program: needle
+# Rundate: Tue 27 Sep 2016 01:21:25
+# Commandline: needle
+#    -outfile tta_.aln
+#    -asequence target.fasta
+#    -bsequence template.fasta
+#    -gapopen 10
+#    -gapextend 0.5
+# Align_format: srspair
+# Report_file: tta_.aln
+########################################
+
+#=======================================
+#
+# Aligned_sequences: 2
+# 1: SEQUENCE
+# 2: TEMPLATE
+# Matrix: EDNAFULL
+# Gap_penalty: 10.0
+# Extend_penalty: 0.5
+#
+# Length: 213
+# Identity:     164/213 (77.0%)
+# Similarity:   164/213 (77.0%)
+# Gaps:          49/213 (23.0%)
+# Score: 809.5
+# 
+#
+#=======================================
+
+SEQUENCE           1 -------------------------GGUUGGGUUGGGAAGUAUCAUGGCU     25
+                                              |||||||||||||||||||||||||
+TEMPLATE           1 CAUCCGGUAUCCCAAGACAAUCUCGGGUUGGGUUGGGAAGUAUCAUGGCU     50
+
+SEQUENCE          26 AAUCACCAUGAUGCAAUCGGGUUGAACACUUAAUUGGGUUAAAACGGUGG     75
+                     ||||||||||||||||||||||||||||||||||||||||||||||||||
+TEMPLATE          51 AAUCACCAUGAUGCAAUCGGGUUGAACACUUAAUUGGGUUAAAACGGUGG    100
+
+SEQUENCE          76 GGGACGAUCCCGUAACAUCCGUCCUAACGGCGACAGACUGCACGGCCCUG    125
+                     ||||||||||||||||||||||||||||||||||||||||||||||||||
+TEMPLATE         101 GGGACGAUCCCGUAACAUCCGUCCUAACGGCGACAGACUGCACGGCCCUG    150
+
+SEQUENCE         126 CCUCUUAGGUGUGUCCAAUGAACAGUCGUUCCGAAAGGAAGCAUCCGGUA    175
+                     ||||  |||||||||||||||||||||||||||||||||||         
+TEMPLATE         151 CCUC--AGGUGUGUCCAAUGAACAGUCGUUCCGAAAGGAAG---------    189
+
+SEQUENCE         176 UCCCAAGACAAUC    188
+                                  
+TEMPLATE         189 -------------    189
+
+
+#---------------------------------------
+#---------------------------------------

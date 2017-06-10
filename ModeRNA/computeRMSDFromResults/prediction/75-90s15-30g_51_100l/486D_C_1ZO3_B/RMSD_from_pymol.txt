@@ -1,0 +1,11 @@
+PyMOL>load ./prediction/75-90s15-30g_51_100l/486D_C_1ZO3_B/target.pdb
+ CmdLoad: "./prediction/75-90s15-30g_51_100l/486D_C_1ZO3_B/target.pdb" loaded as "target".
+PyMOL>load ./prediction/75-90s15-30g_51_100l/486D_C_1ZO3_B/modelModeRNA.pdb
+ CmdLoad: "./prediction/75-90s15-30g_51_100l/486D_C_1ZO3_B/modelModeRNA.pdb" loaded as "modelModeRNA".
+PyMOL>align target, modelModeRNA, cycles=0
+ Match: read scoring matrix.
+ Match: assigning 61 x 72 pairwise scores.
+ MatchAlign: aligning residues (61 vs 72)...
+ MatchAlign: score 519.000
+ ExecutiveAlign: 1303 atoms aligned.
+ Executive: RMS =    4.845 (1303 to 1303 atoms)

@@ -1,0 +1,14 @@
+1Z43_A.fasta 4Y1M_A.fasta
+1Z43_A.fasta 4Y1M_B.fasta
+3FWO_B.fasta 1C2X_C.fasta
+3JQ4_B.fasta 1C2X_C.fasta
+4QK8_A.fasta 4QLM_A.fasta
+4QK8_A.fasta 4QLN_A.fasta
+4QKA_A.fasta 4QLM_A.fasta
+4QKA_A.fasta 4QLN_A.fasta
+4QLM_A.fasta 4QK8_A.fasta
+4QLM_A.fasta 4QKA_A.fasta
+4QLN_A.fasta 4QK8_A.fasta
+4QLN_A.fasta 4QKA_A.fasta
+4Y1M_A.fasta 1Z43_A.fasta
+4Y1M_B.fasta 1Z43_A.fasta

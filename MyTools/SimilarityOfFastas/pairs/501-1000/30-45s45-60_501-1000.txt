@@ -1,0 +1,6 @@
+1FG0_A.fasta 3J2C_N.fasta
+1FG0_A.fasta 4R0D_A.fasta
+3J2C_N.fasta 1FG0_A.fasta
+3J2C_N.fasta 4R0D_A.fasta
+4R0D_A.fasta 1FG0_A.fasta
+4R0D_A.fasta 3J2C_N.fasta

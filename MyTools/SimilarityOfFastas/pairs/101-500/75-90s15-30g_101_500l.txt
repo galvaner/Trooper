@@ -1,0 +1,4 @@
+4P8Z_A.fasta 4P95_A.fasta
+4P8Z_A.fasta 4P9R_A.fasta
+4P95_A.fasta 4P8Z_A.fasta
+4P9R_A.fasta 4P8Z_A.fasta

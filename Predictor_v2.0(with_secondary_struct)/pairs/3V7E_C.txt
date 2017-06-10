@@ -1,0 +1,9 @@
+3V7E_C.fasta 2GIS_A.fasta
+3V7E_C.fasta 2YDH_A.fasta
+3V7E_C.fasta 3GX2_A.fasta
+3V7E_C.fasta 3GX7_A.fasta
+3V7E_C.fasta 3IQP_A.fasta
+3V7E_C.fasta 4AOB_A.fasta
+3V7E_C.fasta 4KQY_A.fasta
+3V7E_C.fasta 5FK1_A.fasta
+3V7E_C.fasta 5FK3_A.fasta

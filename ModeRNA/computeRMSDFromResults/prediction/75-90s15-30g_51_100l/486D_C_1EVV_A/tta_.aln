@@ -1,0 +1,42 @@
+########################################
+# Program: needle
+# Rundate: Sat 24 Sep 2016 01:46:26
+# Commandline: needle
+#    -outfile tta_.aln
+#    -asequence target.fasta
+#    -bsequence template.fasta
+#    -gapopen 10
+#    -gapextend 0.5
+# Align_format: srspair
+# Report_file: tta_.aln
+########################################
+
+#=======================================
+#
+# Aligned_sequences: 2
+# 1: SEQUENCE
+# 2: TEMPLATE
+# Matrix: EDNAFULL
+# Gap_penalty: 10.0
+# Extend_penalty: 0.5
+#
+# Length: 79
+# Identity:      51/79 (64.6%)
+# Similarity:    51/79 (64.6%)
+# Gaps:          24/79 (30.4%)
+# Score: 162.5
+# 
+#
+#=======================================
+
+SEQUENCE           1 GCGGAUUUAGCUCAGUUGGGAGAGCGCCCGCU---UGUCGCGUGGGAGGU     47
+                     ||||||||| |||||  |||||||| ||.|.|   |        ||||  
+TEMPLATE           1 GCGGAUUUA-CUCAG--GGGAGAGC-CCAGAUAAAU--------GGAG--     36
+
+SEQUENCE          48 CCUGUGUUCGAUCCACAGAAUUCGC----     72
+                       |.|||.|| ||||||||||||||    
+TEMPLATE          37 --UCUGUGCG-UCCACAGAAUUCGCACCA     62
+
+
+#---------------------------------------
+#---------------------------------------

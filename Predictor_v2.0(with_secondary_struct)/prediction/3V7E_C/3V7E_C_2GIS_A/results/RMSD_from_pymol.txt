@@ -1,0 +1,11 @@
+PyMOL>load ../prediction/3V7E_C/3V7E_C_2GIS_A/results/3v7e.pdb
+ CmdLoad: "../prediction/3V7E_C/3V7E_C_2GIS_A/results/3v7e.pdb" loaded as "3v7e".
+PyMOL>load ../prediction/3V7E_C/3V7E_C_2GIS_A/results/predicted_structure.pdb
+ CmdLoad: "../prediction/3V7E_C/3V7E_C_2GIS_A/results/predicted_structure.pdb" loaded as "predicted_structure".
+PyMOL>align 3v7e, predicted_structure, cycles=0
+ Match: read scoring matrix.
+ Match: assigning 126 x 126 pairwise scores.
+ MatchAlign: aligning residues (126 vs 126)...
+ MatchAlign: score 1260.000
+ ExecutiveAlign: 2682 atoms aligned.
+ Executive: RMS =   21.620 (2682 to 2682 atoms)
