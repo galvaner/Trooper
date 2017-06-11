@@ -1,0 +1,19 @@
+myRMSD: 5.94675657895
+modernaRMSD: 7.57686184211
+
+count: 608
+
+Length 50-100 NK:
+
+myRMSD: 5.76941304348                     
+modernaRMSD: 8.34090711462
+
+count: 506
+
+Length 100-500 NK:
+
+myRMSD: 6.82651960784
+
+modernaRMSD: 3.78659803922         
+
+count: 102
