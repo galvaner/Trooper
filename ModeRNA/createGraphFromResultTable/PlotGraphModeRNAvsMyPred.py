@@ -1,3 +1,7 @@
+# script takes as input the output from evaluate_results.sh
+# choose PlotGraph2 or PlotGraph1 method to be executed  
+
+
 class Prediction(object):
     def __init__(self, target, template, length, similarity, gap, myRmsd, modeRnaRmsd):
         self.template = template

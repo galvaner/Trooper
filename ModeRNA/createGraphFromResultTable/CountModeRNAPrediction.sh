@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# compute how many files were predicted/unpredicted by ModeRNA 
+
 predicted='0'
 unpredicted='0'
 total='0'
@@ -6,7 +9,7 @@ for D in `find ./prediction/*/*/ -maxdepth 0 -mindepth 0 -type d`
 do
 	line=""
 	pred_name=`echo $D | cut -d / -f4`
-	#check if the file was predicted by modeRNA and process result
+# check if the file was predicted by modeRNA and process result
 	total=$((total+1))
 	if [ -a ${D}RMSD_from_pymol.txt ];
 	then

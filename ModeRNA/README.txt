@@ -1,0 +1,2 @@
+Here are all scripts I have used for creating ModeRNA prediction and then to compare it to predictions done by me.
+Most of them are dependant on folder structure so be aware of that if you want to use them.

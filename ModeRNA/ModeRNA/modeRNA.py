@@ -1,5 +1,8 @@
 __author__ = 'Rasto'
 
+# script used by runModernaPredictionBasedOnPairs.py 
+# ModeRNA has to be installed in the system - I used it only with Windows operating system
+
 from Bio.PDB import *
 from Bio.Emboss.Applications import *
 from moderna import *

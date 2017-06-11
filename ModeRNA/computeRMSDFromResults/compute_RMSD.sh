@@ -1,7 +1,7 @@
 #!/bin/bash
 
-
-#compute RMDS using pymol
+# be aware of paths structure, also script expects target structure to be present as target.pdb
+# compute RMDS using PyMol
 
 module add pymol-1.7.6-gcc
 module add pymol-1.8.2.1-gcc

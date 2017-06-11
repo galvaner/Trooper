@@ -1,5 +1,10 @@
 __author__ = 'Rasto'
 
+# script used to automatically predict RNA structures by ModeRNA.
+# ModeRNA has to be installed in the system - I used it only with Windows operating system
+# expect my classic placement of fastas and pdbs (but in the same directory as this script)
+# using modeRNA.py script
+
 import os
 from shutil import copyfile
 import modeRNA
