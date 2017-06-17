@@ -1,0 +1,8 @@
+1. Supply "pairs" file(s) (named like "60-75s30-45g_51_100l.txt", only numbers and letters can be changed) to pair folder. 
+(Prepared examples can be found in "RNA_Predictor/MyTools/SimilarityOfFastas/pairs/*/")
+2. Make sure that you have desired PDB and FASTA files (in case you provided your own file).
+3. Run prepare_rosetta_prediction.sh
+4. Run startFARFAR.sh
+5. Wait till FARFAR prediction is done (default 23:59:00, can be changed in config.py)
+6. Run extract_pdbs.sh
+7. Run concat_pdbs.sh
