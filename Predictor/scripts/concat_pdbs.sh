@@ -14,7 +14,7 @@ module add python27-modules-gcc
 
 for D in `find ../prediction/*/*/results/ -maxdepth 0 -mindepth 0 -type d`
 do
-	chainID="A"    #`echo $D | cut -d_ -f4`  rosetta dava vzdy chain A?????? 
+	chainID="A"    #`echo $D | cut -d_ -f4`  rosetta dava vzdy chain A 
 	python conect_predicted_pdbs.py -i "$chainID" -d "$D"
 done
 
@@ -41,4 +41,5 @@ do
 			align $native_struct, predicted_structure, cycles=0 " 
 	echo -e $pml_script > temp.pml
 	pymol -qc temp.pml > ${D}RMSD_from_pymol.txt
+	rm *.pml *.pdb
 done

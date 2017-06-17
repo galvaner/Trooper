@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #import modules
 echo "++Importing modules...++"
 module add python-2.7.10-gcc python-2.7.10-intel

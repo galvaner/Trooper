@@ -18,8 +18,8 @@ import math
 from Bio.PDB import *
 import numpy as np
 
-
-def cut_spheres(input_pdb, target_length,  path_to_output, chainID, mysterious_constant=2.5,minimum_gap_length = 5, modelID = 0):
+# misterious constant is constant which says how each residue is aprox long (take the middle between two residues nad to the sphere take every residues which lies in #missingRes*mysteriousConstant)
+def cut_spheres(input_pdb, target_length,  path_to_output, chainID, mysterious_constant=2.5, minimum_gap_length = 5, modelID = 0):
     parser_pdb = PDBParser()
     structure = parser_pdb.get_structure('self', input_pdb)
     model = structure[modelID]

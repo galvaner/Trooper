@@ -16,8 +16,7 @@ __author__ = 'Rasto'
 import argparse
 from Bio.PDB import *
 import os
-
-
+import config
 
 def prepare_rosetta_script(structures_number, chainID, target_length, dir ):
     # "end" line HAS TO be at the file end
@@ -33,7 +32,7 @@ def prepare_rosetta_script(structures_number, chainID, target_length, dir ):
     # divide the whole sequence into smaller
     divide_into_smaller_seq_and_prepare_statements(excluded_gaps_array,
                                                    target_length,
-                                                   300,
+                                                   config.configDividePredictionIntoRegionsOfSize,
                                                    dir+"conserved_edited_regions.pdb",
                                                    structures_number,
                                                    "../target.fasta",
