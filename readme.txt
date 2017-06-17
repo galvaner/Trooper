@@ -9,3 +9,5 @@ All *.sh script are made to be used in MetacentrumVO environment (https://wiki.m
 Be aware that by not runnig the tasks parallel you will lost big advantage of this tool and the prediction will take longer time.
 
 More info how to run the prediction can be found in Predictor/RunPrediction.txt.
+ 
+In case of any questions please contact me at r.galvanek@outlook.sk
