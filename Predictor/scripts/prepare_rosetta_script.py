@@ -16,9 +16,11 @@ __author__ = 'Rasto'
 import argparse
 from Bio.PDB import *
 import os
+import PredictSecondaryStructure
 import config
 
-def prepare_rosetta_script(structures_number, chainID, target_length, dir ):
+def prepare_rosetta_script(structures_number, chainID, target_length, dir, target, template ):
+    secStrObject = PredictSecondaryStructure.RunSecStrPRediction(target, template, dir) #  predict secondary structure
     # "end" line HAS TO be at the file end
     # load gaps into array and last residue, also shifts beginning and ending gaps
     file = open(dir+"cut_spheres/big_gaps.txt",'r')
@@ -38,12 +40,16 @@ def prepare_rosetta_script(structures_number, chainID, target_length, dir ):
                                                    "../target.fasta",
                                                    dir+"prepare_rosetta_scripts/",
                                                    dir+"prepared_statements.txt",
-                                                   chainID)
+                                                   chainID,
+                                                   0,
+                                                   secStrObject)
     prepare_statements_for_cut_spheres(dir+"prepared_statements.txt",
                                        "../target.fasta",
                                        structures_number,
                                        dir+"cut_spheres/",
-                                       chainID)
+                                       chainID,
+                                       0,
+                                       secStrObject)
 
 class SelectResidues(Select):
     def __init__(self, accept_boundaries, chain_id):
@@ -66,7 +72,8 @@ def divide_into_smaller_seq_and_prepare_statements(excluded_gaps_array,
                                                    path="../files/prepare_rosetta_scripts/",
                                                    statement_file="../files/prepared_statements.txt",
                                                    chainID="A",
-                                                   modelID=0):
+                                                   modelID=0,
+                                                   secStrObject = None):
     parser_pdb = PDBParser()
     structure = parser_pdb.get_structure('target', pdb_in)
     model = structure[modelID]
@@ -97,7 +104,8 @@ def divide_into_smaller_seq_and_prepare_statements(excluded_gaps_array,
 
     for section in section_array:
         first_gap = True
-        script_params = "rna_denovo_setup.py -fasta " + fasta_name + " -s " + str(section[0]) + "_" + str(section[1]) + ".pdb -fixed_stems -nstruct " + str(structures_to_generate) + " -working_res "
+        script_params = "rna_denovo_setup.py -fasta " + fasta_name + " -s " + str(section[0]) + "_" + str(section[1]) + ".pdb -fixed_stems -nstruct " + str(structures_to_generate) + " -secstruct_file ../secstruForRosetta.secstr" + " -working_res " # be aware that one shell scripts extract path from this file...
+        workingResPairs = []
         last_gap = section
         for gap in excluded_gaps_array:
             if gap[0] >= section[0] and gap[1] <= section[1]:
@@ -105,21 +113,32 @@ def divide_into_smaller_seq_and_prepare_statements(excluded_gaps_array,
                     first_gap = False
                     if section[0] == gap[0]: # if's are here because of error later if in working residues is this pattern: 111-111
                         script_params = script_params + str(section[0]) + " "
+                        workingResPairs.append([section[0], section[0]])
                     else:
                         script_params = script_params + str(section[0]) + "-" + str(gap[0]) + " "
+                        workingResPairs.append([section[0], gap[0]])
                 else:
                     if last_gap[1] == gap[0]:
                         script_params = script_params + str(last_gap[1]) + " "
+                        workingResPairs.append([last_gap[1], last_gap[1]])
                     else:
                         script_params = script_params + str(last_gap[1]) + "-" + str(gap[0]) + " "
+                        workingResPairs.append([last_gap[1], gap[0]])
                 last_gap = gap
         if first_gap: #case that there are no gaps in this section (so all residues are working)
             script_params = script_params + str(section[0]) + "-" + str(section[1]) + " "
+            workingResPairs.append([section[0], section[1]])
         else:         #last part of working residues
             if last_gap[1] == section[1]:
                 script_params = script_params + str(last_gap[1]) + " "
+                workingResPairs.append([last_gap[1], last_gap[1]])
             else:
                 script_params = script_params + str(last_gap[1]) + "-" + str(section[1]) + " "
+                workingResPairs.append([last_gap[1], section[1]])
+        print "WORKING_RES_PAIR" + str(workingResPairs)
+        addToMatchPairing = secStrObject.FixUnpairedChosenWorkingResidues(workingResPairs)  # secondary structure purpouse
+        print "RESULT: " + str(addToMatchPairing)
+        script_params += addToMatchPairing
         file_for_statements.write(script_params + "\n")
     file_for_statements.close()
 
@@ -128,7 +147,8 @@ def prepare_statements_for_cut_spheres(statement_file="../files/prepared_stateme
                                        structures_to_generate="100",
                                        path_to_output_cut_spheres='../files/cut_spheres/',
                                        chainID='A',
-                                       modelID=0): #prepare script calls for longer gaps created in script cut spheres
+                                       modelID=0,
+                                       secStrObject = None): #prepare script calls for longer gaps created in script cut spheres
     array_index = 0
     file_for_statements = open(statement_file,'a')
     for input_pdb in os.listdir(path_to_output_cut_spheres):
@@ -146,7 +166,8 @@ def prepare_statements_for_cut_spheres(statement_file="../files/prepared_stateme
         seq_start = -1
         seq_length = 0
         first_cycle = True
-        script_params = "rna_denovo_setup.py -fasta " + fasta + " -s " +  input_pdb + " -fixed_stems -nstruct " + str(structures_to_generate) + " -working_res "
+        workingResPairs = []
+        script_params = "rna_denovo_setup.py -fasta " + fasta + " -s " + input_pdb + " -fixed_stems -nstruct " + str(structures_to_generate) + " -secstruct_file ../secstruForRosetta.secstr" + " -working_res "
         for residue in chain:
             current = residue.id[1]
             if first_cycle:
@@ -161,17 +182,26 @@ def prepare_statements_for_cut_spheres(statement_file="../files/prepared_stateme
             else:
                 if seq_length == 0:
                     script_params = script_params + str(seq_start) + " "
+                    workingResPairs.append([seq_start, seq_start])
                 else:
                     script_params = script_params + str(seq_start) + "-" + str(seq_start + seq_length) + " "
+                    workingResPairs.append([seq_start, seq_start + seq_length])
                 seq_length = 0
                 last = current
                 seq_start = current
         #residues "stuck" in for cycle
         if seq_length == 0:
             script_params = script_params + str(seq_start) + " "
+            workingResPairs.append([seq_start, seq_start])
         else:
             script_params = script_params + str(seq_start) + "-" + str(seq_start + seq_length) + " "
+            workingResPairs.append([seq_start, seq_start + seq_length])
         script_params = script_params + from_ + "-" + to_
+        workingResPairs.append([int(from_), int(to_)])
+        print "WORKING_RES_PAIR" + str(workingResPairs)
+        addToMatchPairing = secStrObject.FixUnpairedChosenWorkingResidues(workingResPairs) #  secondary structure purpouse
+        print "RESULT: " + str(addToMatchPairing)
+        script_params += addToMatchPairing
         file_for_statements.write(script_params + "\n")
     file_for_statements.close()
 

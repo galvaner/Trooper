@@ -1,5 +1,4 @@
 __author__ = 'Rasto'
-
 import os
 
 def get_pdb_files(directory_path):
@@ -26,27 +25,43 @@ def copy_residues(pdbs_directory, chainID, modelID = 0):
     structure_builder.init_model(0)
     structure_builder.init_chain("A")
     connected_structure = structure_builder.get_structure()
+    markingList = __initializeMarkingList__()
     for file in file_list:
         range_ = get_range_to_copy(file)
         predicted_part_structure = parser_pdb.get_structure("predicted_part", pdbs_directory + "/" + file)
         for res in predicted_part_structure[modelID][chainID]:
             if res.id[1] >= range_['from'] and res.id[1] <= range_['till']:
-                connected_structure[modelID][chainID].insert(res.id[1],res)
-
+                if not __isAlredyResidueInFinalStructure__(res.id[1], markingList, (range_['till'] - range_['from'] + 1)):
+                    connected_structure[modelID][chainID].insert(res.id[1], res)
+                    #print markingList
     #debug for res in connected_structure[modelID][chainID]:
         #debug check_array[res.id[1]] = True
     #debug for i in range(0,2999):
         #debug if not check_array[i]:
             #debug print i
-
     io = PDBIO()
     io.set_structure(connected_structure)
     io.save("predicted_structure.pdb")
 
+def __initializeMarkingList__():
+    list = [None] * 150
+    return list
+
+def __isAlredyResidueInFinalStructure__(residueId, markExisting, predictedSubseqLength):
+    if markExisting[residueId] is None:
+        markExisting[residueId] = predictedSubseqLength
+        return False
+    elif markExisting[residueId] > predictedSubseqLength:
+        markExisting[residueId] = predictedSubseqLength
+        return True  # treba prepracovat
+    else:
+        return True
+    
+
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('-i','--chainID')
-parser.add_argument('-d','--dir')
+parser.add_argument('-i', '--chainID')
+parser.add_argument('-d', '--dir')
 args = vars(parser.parse_args())
 chainID = args["chainID"]
 dir = args["dir"]

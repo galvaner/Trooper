@@ -17,8 +17,7 @@ import argparse
 from Bio.PDB import *
 import os
 import PredictSecondaryStructure
-
-
+import config
 
 def prepare_rosetta_script(structures_number, chainID, target_length, dir, target, template ):
     secStrObject = PredictSecondaryStructure.RunSecStrPRediction(target, template, dir) #  predict secondary structure
@@ -35,7 +34,7 @@ def prepare_rosetta_script(structures_number, chainID, target_length, dir, targe
     # divide the whole sequence into smaller
     divide_into_smaller_seq_and_prepare_statements(excluded_gaps_array,
                                                    target_length,
-                                                   300,
+                                                   config.configDividePredictionIntoRegionsOfSize,
                                                    dir+"conserved_edited_regions.pdb",
                                                    structures_number,
                                                    "../target.fasta",

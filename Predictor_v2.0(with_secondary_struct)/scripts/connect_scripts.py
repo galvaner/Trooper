@@ -9,6 +9,7 @@ import edit_conserved_regions
 import cut_spheres
 import prepare_rosetta_script
 import PredictSecondaryStructure
+import config
 
 cashe = {}
 
@@ -165,14 +166,14 @@ def prepare_prediction(parsed_tt):
     align.compute_emboss_alignment(parsed_tt['target_fasta'], parsed_tt['template_fasta'], parsed_tt['dir']+"emboss.aln")
     create_shell_script(parsed_tt["target"], parsed_tt["template"], parsed_tt["template_pdb"], parsed_tt["template_chainID"], parsed_tt['dir'])
     shell_script_call()
-    sliding_window.run_sliding_window(parsed_tt['dir']+"tta.aln", parsed_tt["target"], parsed_tt["template"], 10, 5,
+    sliding_window.run_sliding_window(parsed_tt['dir']+"tta.aln", parsed_tt["target"], parsed_tt["template"], config.configSlidingWindowSize, config.configSlidingWindowMinCoverage,
                                       parsed_tt['dir']+"template.pdb", parsed_tt['template_chainID'], parsed_tt['dir'] )
     edit_conserved_regions.edit_conserved_regions(parsed_tt['template'], parsed_tt['target'], parsed_tt['dir']+"tta.aln", parsed_tt['dir']+"conserved_regions.pdb"
                            ,parsed_tt['dir']+"conserved_edited_regions.pdb", parsed_tt['dir']+"target.fasta", parsed_tt["template_chainID"])
     length = get_target_length(parsed_tt['target_fasta'])
     print("Target length = " + str(length))
     cut_spheres.cut_spheres(parsed_tt['dir']+"conserved_edited_regions.pdb", length, parsed_tt['dir']+'cut_spheres/', parsed_tt["template_chainID"], 2.7, 5)
-    prepare_rosetta_script.prepare_rosetta_script(100, parsed_tt["template_chainID"], length, parsed_tt['dir'], parsed_tt["target"], parsed_tt["template"])
+    prepare_rosetta_script.prepare_rosetta_script(config.configNumberOFStructuresGeneratedByFARFAR, parsed_tt["template_chainID"], length, parsed_tt['dir'], parsed_tt["target"], parsed_tt["template"])
 
 
 import argparse
