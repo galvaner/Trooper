@@ -44,7 +44,7 @@ def copy_residues(pdbs_directory, chainID, modelID = 0):
     io.save("predicted_structure.pdb")
 
 def __initializeMarkingList__():
-    list = [None] * 150
+    list = [None] * 500  # Todo: should not be constant
     return list
 
 def __isAlredyResidueInFinalStructure__(residueId, markExisting, predictedSubseqLength):
