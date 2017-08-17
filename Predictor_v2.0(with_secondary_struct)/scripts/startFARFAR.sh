@@ -12,6 +12,17 @@ source $ROSETTA/tools/rna_tools/INSTALL
 # create directories in prediction folder and copy all the files (including script /Predictor/prediction/start_prediction.sh)
 cd ../prediction
 
+# clear predictions which resulted in error
+for D in `find ./?*/?*/files -maxdepth 0 -mindepth 0 -type d`
+do
+	parentDir=${D::-6}
+	if [ ! -f ${D}/prepared_statements.txt ]; then
+		# echo ${parentDir}
+    		rm -rf ${parentDir}
+	fi
+done
+
+
 # copy prepared parts of .pdb files to newly created rosetta folder
 
 for filename in ./*/*/files/*/*.pdb; do 

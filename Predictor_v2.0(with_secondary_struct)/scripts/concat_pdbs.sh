@@ -14,7 +14,7 @@ module add python27-modules-gcc
 
 for D in `find ../prediction/*/*/results/ -maxdepth 0 -mindepth 0 -type d`
 do
-	chainID="A"    #`echo $D | cut -d_ -f4`  rosetta dava vzdy chain A?????? 
+	chainID="A"    #`echo $D | cut -d_ -f4`  rosetta dava vzdy chain A 
 	python conect_predicted_pdbs.py -i "$chainID" -d "$D"
 done
 
@@ -22,11 +22,9 @@ done
 
 for D in `find ../prediction/*/*/results/ -maxdepth 0 -mindepth 0 -type d`
 do
-	echo $D
-	chainID=`echo $D | cut -d_ -f3`
-	native_struct=`echo "$D" | cut -d_ -f2 | cut -d/ -f2 | tr '[:upper:]' '[:lower:]'`
+	chainID=`echo $D | cut -d_ -f4`
+	native_struct=`echo $D | cut -d_ -f3 | cut -d/ -f2 | tr '[:upper:]' '[:lower:]'`
 	native_pdb=../pdbs/$native_struct.pdb
-	echo $native_pdb
 	grep "^ATOM.................$chainID" $native_pdb > $D/$native_struct.pdb
 done
 
@@ -37,10 +35,11 @@ module add pymol-1.8.2.1-gcc
 
 for D in `find ../prediction/*/*/results/ -maxdepth 0 -mindepth 0 -type d`
 do
-	native_struct=`echo $D | cut -d_ -f2 | cut -d/ -f2 | tr '[:upper:]' '[:lower:]'`
+	native_struct=`echo $D | cut -d_ -f3 | cut -d/ -f2 | tr '[:upper:]' '[:lower:]'`
 	pml_script="	load $D$native_struct.pdb \n 
 			load ${D}predicted_structure.pdb \n 
 			align $native_struct, predicted_structure, cycles=0 " 
 	echo -e $pml_script > temp.pml
 	pymol -qc temp.pml > ${D}RMSD_from_pymol.txt
+	rm *.pml *.pdb
 done

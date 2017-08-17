@@ -50,32 +50,33 @@ class ListOfPredictions(object):
         return {"myAverage":myAverage, "modeRnaAverage":modeRnaAverage, "count":count, "curmsd": countUnderRMSD}
 
 
+def LoadInputTable(tableName):
+    inputTable = file(tableName, 'r')
+    predictionList = ListOfPredictions()
+    for line in inputTable: # expect lines like: TARGET  TEMPLATE    LEN    SIMIL      GAP     MY_RMSD MODERNA_RMSD
+        lineSplited = line.split()
+        if lineSplited[0] == "TARGET":
+            continue
+        predictionList.AppendPrediction(Prediction(lineSplited[0], lineSplited[1], lineSplited[2], lineSplited[3][:-1], lineSplited[4][:-1], lineSplited[5], lineSplited[6]))
+    #ComputeAverangeRMSDs(self, minLength, maxLength, maxRMSD, minSim, maxSim, minGap, maxGap):
+    result = predictionList.ComputeAverangeRMSDs(0, 9999, 30, 0, 100, 0, 100)
+    print "myRMSD: " + str(result["myAverage"])
+    print "modernaRMSD: " + str(result["modeRnaAverage"])
+    print "count: " + str(result["count"])
+    print "count under certain RMSD: " + str(result["curmsd"])
 
-inputTable = file("result_table.txt", 'r')
-predictionList = ListOfPredictions()
-for line in inputTable: # expect lines like: TARGET  TEMPLATE    LEN    SIMIL      GAP     MY_RMSD MODERNA_RMSD
-    lineSplited = line.split()
-    if lineSplited[0] == "TARGET":
-        continue
-    predictionList.AppendPrediction(Prediction(lineSplited[0], lineSplited[1], lineSplited[2], lineSplited[3][:-1], lineSplited[4][:-1], lineSplited[5], lineSplited[6]))
-#ComputeAverangeRMSDs(self, minLength, maxLength, maxRMSD, minSim, maxSim, minGap, maxGap):
-result = predictionList.ComputeAverangeRMSDs(0, 9999, 30, 0, 100, 0, 100)
-print "myRMSD: " + str(result["myAverage"])
-print "modernaRMSD: " + str(result["modeRnaAverage"])
-print "count: " + str(result["count"])
-print "count under certain RMSD: " + str(result["curmsd"])
+    result = predictionList.ComputeAverangeRMSDs(50, 100, 30, 0, 100, 0, 100)
+    print "myRMSD: " + str(result["myAverage"])
+    print "modernaRMSD: " + str(result["modeRnaAverage"])
+    print "count: " + str(result["count"])
+    print "count under certain RMSD: " + str(result["curmsd"])
+    result = predictionList.ComputeAverangeRMSDs(101, 500, 30, 0, 100, 0, 100)
+    print "myRMSD: " + str(result["myAverage"])
+    print "modernaRMSD: " + str(result["modeRnaAverage"])
+    print "count: " + str(result["count"])
+    print "count under certain RMSD: " + str(result["curmsd"])
 
-result = predictionList.ComputeAverangeRMSDs(50, 100, 30, 0, 100, 0, 100)
-print "myRMSD: " + str(result["myAverage"])
-print "modernaRMSD: " + str(result["modeRnaAverage"])
-print "count: " + str(result["count"])
-print "count under certain RMSD: " + str(result["curmsd"])
-result = predictionList.ComputeAverangeRMSDs(101, 500, 30, 0, 100, 0, 100)
-print "myRMSD: " + str(result["myAverage"])
-print "modernaRMSD: " + str(result["modeRnaAverage"])
-print "count: " + str(result["count"])
-print "count under certain RMSD: " + str(result["curmsd"])
-
+    return predictionList
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -205,4 +206,21 @@ def PlotGraph1(predictionList):
 
     plt.show()
 
-PlotGraph2(predictionList)
+def CompareResults(list_w_o_sec_str, list_with_sec_str):
+    # idea: put all records of second list into dictionary and them index them by the first list - and compare
+    dictionary_with_sec_str = {}
+    for record in list_with_sec_str.predList:
+        if record.myRmsd != 'N/A' and record.myRmsd < 50:
+            dictionary_with_sec_str[record.target + record.template] = record.myRmsd
+    for record in list_w_o_sec_str.predList:
+        if record.myRmsd != 'N/A' and record.myRmsd < 50:
+            if dictionary_with_sec_str.has_key(record.target + record.template):
+                if dictionary_with_sec_str[record.target + record.template] > record.myRmsd + 3:
+                    print  'Target: ' + record.target + ', Tempalte: ' + record.template + ', RMSD_w_o_sec_str: ' + str(record.myRmsd) + ', RMSD_with_sec_str: ' + str(dictionary_with_sec_str[record.target + record.template])
+
+
+predictionList = LoadInputTable("result_table.txt")
+predictionList_w_o_sec_str = LoadInputTable("result_table_w_o_sec_str.txt")
+CompareResults(predictionList_w_o_sec_str, predictionList)
+#PlotGraph1(predictionList)
+#PlotGraph2(predictionList)
