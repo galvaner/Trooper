@@ -21,6 +21,8 @@ class Prediction(object):
 
 class ListOfPredictions(object):
     predList = []
+    def __init__(self):
+        self.predList = []
     def AppendPrediction(self, prediction):
         """
         :type prediction: Prediction
