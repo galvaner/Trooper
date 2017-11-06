@@ -1,1 +1,0 @@
-rna_denovo_setup.py -fasta ../target.fasta -s 1_126.pdb -fixed_stems -nstruct 100 -secstruct_file ../secstruForRosetta.secstr -working_res 1-126 

@@ -1,1 +1,0 @@
-/storage/praha1/home/galvaner/rosetta/rosetta_bin_linux_2015.38.58158_bundle/main/source/bin/rna_denovo.linuxgccrelease -nstruct 100 -params_file 37_115.params -fasta 37_115.fasta  -out:file:silent 37_115.out -include_neighbor_base_stacks  -minimize_rna true -s 37_115.pdb -input_res  1-31 111-116  -output_res_num  5-33 35-121

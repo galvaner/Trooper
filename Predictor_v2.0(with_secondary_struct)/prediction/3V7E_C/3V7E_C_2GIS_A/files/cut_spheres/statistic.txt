@@ -1,6 +1,0 @@
-GFS: [4, 79, 5]
-Mean: 29.3333333333
-Median: 5.0
-Std:35.1220095603
-MAX: 79
-Gaps count: 3
