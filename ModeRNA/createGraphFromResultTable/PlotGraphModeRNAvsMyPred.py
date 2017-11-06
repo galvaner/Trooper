@@ -62,17 +62,20 @@ def LoadInputTable(tableName):
         predictionList.AppendPrediction(Prediction(lineSplited[0], lineSplited[1], lineSplited[2], lineSplited[3][:-1], lineSplited[4][:-1], lineSplited[5], lineSplited[6]))
     #ComputeAverangeRMSDs(self, minLength, maxLength, maxRMSD, minSim, maxSim, minGap, maxGap):
     result = predictionList.ComputeAverangeRMSDs(0, 9999, 30, 0, 100, 0, 100)
+    print "********ALL*******"
     print "myRMSD: " + str(result["myAverage"])
     print "modernaRMSD: " + str(result["modeRnaAverage"])
     print "count: " + str(result["count"])
     print "count under certain RMSD: " + str(result["curmsd"])
 
     result = predictionList.ComputeAverangeRMSDs(50, 100, 30, 0, 100, 0, 100)
+    print "********50-100*******"
     print "myRMSD: " + str(result["myAverage"])
     print "modernaRMSD: " + str(result["modeRnaAverage"])
     print "count: " + str(result["count"])
     print "count under certain RMSD: " + str(result["curmsd"])
     result = predictionList.ComputeAverangeRMSDs(101, 500, 30, 0, 100, 0, 100)
+    print "********101-500*******"
     print "myRMSD: " + str(result["myAverage"])
     print "modernaRMSD: " + str(result["modeRnaAverage"])
     print "count: " + str(result["count"])
@@ -214,15 +217,101 @@ def CompareResults(list_w_o_sec_str, list_with_sec_str):
     for record in list_with_sec_str.predList:
         if record.myRmsd != 'N/A' and record.myRmsd < 50:
             dictionary_with_sec_str[record.target + record.template] = record.myRmsd
+    # dictionary: {with secondary structure, without secondary structure, ModeRNA prediction}
+    wss_woss_mrna_dict = {}
     for record in list_w_o_sec_str.predList:
         if record.myRmsd != 'N/A' and record.myRmsd < 50:
             if dictionary_with_sec_str.has_key(record.target + record.template):
+                if record.modeRnaRmsd != 'N/A' and record.length < 1000: # ToDo: parametrizuj podla dlzky
+                    wss_woss_mrna_dict[record.target + record.template] = [dictionary_with_sec_str[record.target + record.template] ,record.myRmsd, record.modeRnaRmsd, record.length]
                 if dictionary_with_sec_str[record.target + record.template] > record.myRmsd + 3:
-                    print  'Target: ' + record.target + ', Tempalte: ' + record.template + ', RMSD_w_o_sec_str: ' + str(record.myRmsd) + ', RMSD_with_sec_str: ' + str(dictionary_with_sec_str[record.target + record.template])
+                    pass
+                    #print 'Target: ' + record.target + ', Tempalte: ' + record.template + ', RMSD_w_o_sec_str: ' + str(record.myRmsd) + ', RMSD_with_sec_str: ' + str(dictionary_with_sec_str[record.target + record.template])
+    return wss_woss_mrna_dict
+
+def CompareAvarageResults(dict):
+    print sum(dict[l][0] for l in dict) / len(dict)
+    print sum(dict[l][1] for l in dict) / len(dict)
+    print sum(dict[l][2] for l in dict) / len(dict)
+
+# returns list: [RMSD_WITH_SECSTRU, RMSD_WO_SECSTRU, # of FalsePositives in secstru prediction divided by structure length]
+def EnrichDictionaryWithSecStruFalsePositives(dictToEnrich, enrichByDict):
+    enrichedList = []
+    for key in dictToEnrich:
+        # get target structure name
+        targetName = key[:6]
+        # select false positives and add it to corresponding line in dictionary
+        try:
+            enrichedList.append([dictToEnrich[key][0]
+                                    , dictToEnrich[key][1]
+                                    , float(enrichByDict[targetName][2])
+                                    , dictToEnrich[key][3]])
+            #/dictToEnrich[key][3]]) # put the division to third column and let the #ofFalsePositives be parametrized by length
+        except:
+            pass
+            # it can happen: I do not have to have secStru of all records, template secstru is enough
+    return enrichedList
+
+# as input takes list of [RMSD_WITH_SECSTRU, RMSD_WO_SECSTRU, # of FalsePositives in secstru prediction]
+def PlotGraptCompareWithAndWoSecStr(list):
+    font = {'family': 'normal',
+            'size': 25}
+    plt.rc('font', **font)
+    # count the diference between with and wo secondary struct prediction
+    # negative number means that we went worse, positive that we went better
+    # x axis will be # of false positived in secstru prediction
+    yaxis = []
+    xaxis = []
+    label = []
+    for rec in list:
+        yaxis.append(float(rec[1] - rec[0]))
+        xaxis.append(float(rec[2]))
+        label.append(int(rec[3]))
+    color = ['red' if l < 100 else 'green' for l in label]
+    # linear regression
+    x = np.array(xaxis)
+    y = np.array(yaxis)
+    fit = np.polyfit(x, y, 1)
+    fit_fn = np.poly1d(fit)
+    plt.plot(x, y, 'ro', x, fit_fn(x), '--k') #'ro',
+    #plt.scatter(x, y, color=color)
+    #plt.plot(x, fit_fn(x), '--k')
+    plt.axhline(y = 0)
+    plt.xlabel("FalsePositives in secondary structure prediction (# of basepairs)")
+    plt.ylabel("Differnce between predicted structures (RMSD)")
+    plt.show()
 
 
-predictionList = LoadInputTable("result_table.txt")
-predictionList_w_o_sec_str = LoadInputTable("result_table_w_o_sec_str.txt")
-CompareResults(predictionList_w_o_sec_str, predictionList)
+# returns dictionary like: structureName : TruePos FalseNeg FalsePos
+# as input takes output file from CompareSecondaryStructs.py
+def LoadSecstruComparationResults(filename):
+    file = open(filename, 'rU')
+    firstLine = True
+    # structure TruePos FalseNeg FalsePos TrueNeg
+    dict = {}
+    for line in file:
+        if firstLine:
+            firstLine = False
+            continue
+        splitedLine = str.split(line)
+        dict[splitedLine[0]] = [splitedLine[1], splitedLine[2], splitedLine[3]]
+    file.close()
+    return dict
+
+def ComparationRelatedToSecStru():
+    print '###################WITH SECONDARY STRUCTURE###########################'
+    predictionList = LoadInputTable("result_table.txt")
+    print '##################WITHOUT SECONDARY STRUCTURE############################'
+    predictionList_w_o_sec_str = LoadInputTable("result_table_w_o_sec_str.txt")
+    print '##############################################'
+    dict = CompareResults(predictionList_w_o_sec_str, predictionList)
+    print '##############################################'
+    #CompareAvarageResults(dict)
+    secStruComparation = LoadSecstruComparationResults("SecStruComparation.txt")
+    enrichedList = EnrichDictionaryWithSecStruFalsePositives(dict, secStruComparation)
+    PlotGraptCompareWithAndWoSecStr(enrichedList)
+
+ComparationRelatedToSecStru()
+
 #PlotGraph1(predictionList)
 #PlotGraph2(predictionList)

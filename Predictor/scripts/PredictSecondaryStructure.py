@@ -188,7 +188,7 @@ class SecStrPredictor:
         if i == '-':
             return True
         for pair in listOfPairs:
-            if ((pair[0] - 1) <= int(i)) and ((pair[1] - 1) >= int(i)):  # numbering of residues is indexed from 1 TODO odcitavam spravne jednicku???
+            if ((pair[0] - 1) <= int(i)) and ((pair[1] - 1) >= int(i)):  # numbering of residues is indexed from 1
                 return True
         return False
 
