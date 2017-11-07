@@ -144,7 +144,7 @@ def divide_into_smaller_seq_and_prepare_statements(excluded_gaps_array,
 
 def prepare_statements_for_cut_spheres(statement_file="../files/prepared_statements.txt",
                                        fasta="../target.fasta",
-                                       structures_to_generate="100",
+                                       structures_to_generate=config.configNumberOFStructuresGeneratedByFARFAR,
                                        path_to_output_cut_spheres='../files/cut_spheres/',
                                        chainID='A',
                                        modelID=0,

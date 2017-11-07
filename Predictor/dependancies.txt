@@ -1,0 +1,8 @@
+python 2.7.10 (not 3.X)
+UNIX operating system
+rosetta_bin_linux_2015.38.58158_bundle (or newer)
+biopython (or newer)
+emboss-6.5.7 (or newer)
+viennaRNA-2.0.7 (or newer)
+pymol-1.8.2.1 (or newer)
+

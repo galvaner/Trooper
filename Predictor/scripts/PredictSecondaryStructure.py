@@ -176,7 +176,7 @@ class SecStrPredictor:
         workingResiduesToBeAdded = []
         for pair in rangePairList:
             print pair
-            for i in xrange(pair[0], pair[1]):
+            for i in xrange(pair[0], pair[1] + 1):
                 index = i - 1  # numbering of residues is indexed from 1
                 if not self.__isPairedBrackedAlsoChosenAsWorkingRes__(self.numberedPredictedSecStruct[index], rangePairList):
                     workingResiduesToBeAdded.append(int(self.numberedPredictedSecStruct[index]) + 1)  # numbering of residues is indexed from 1
@@ -188,7 +188,7 @@ class SecStrPredictor:
         if i == '-':
             return True
         for pair in listOfPairs:
-            if ((pair[0] - 1) <= int(i)) and ((pair[1] - 1) >= int(i)):  # numbering of residues is indexed from 1
+            if ((pair[0] - 1) <= int(i)) and ((pair[1] - 1) >= int(i)):  # numbering of residues is indexed from 1 TODO odcitavam spravne jednicku???
                 return True
         return False
 
