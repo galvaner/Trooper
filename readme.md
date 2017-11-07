@@ -8,10 +8,10 @@ The software is still in development, but can be run on local pc. There are prep
 ## Requirements
 1. UNIX-based operating system
 2. Rosetta (https://www.rosettacommons.org/software/license-and-download)
-3. Emboss (http://emboss.sourceforge.net/what/)
-4. VienaRNA (https://www.tbi.univie.ac.at/RNA/), only if you want to use version witch firstly predicts secondary structure.
-5. PyMOL
-6. Python v2.7
+3. Emboss (http://emboss.sourceforge.net/what/) (must be accesible from command line)
+4. VienaRNA (https://www.tbi.univie.ac.at/RNA/), only if you want to use version witch firstly predicts secondary structure.(must be accesible from command line)
+5. PyMOL (must be accesible from command line)
+6. Python v2.7 (must be accesible from command line)
 7. BioPython
 
 ## INSTALATION
