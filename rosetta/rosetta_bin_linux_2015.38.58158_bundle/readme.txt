@@ -1,1 +1,0 @@
-Here should come rosseta software package (linux_2015.38.58158, which I downloaded as alredy compiled package). 
