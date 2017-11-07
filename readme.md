@@ -3,7 +3,7 @@
 RNA tertiary structure prediction approaches can be divided into two groups: de novo methods and template-based modeling. De novo are applicable only for small molecules while in case of medium and large size RNA molecules, template-based modeling needs to be employed. While this type of modeling is quite common in protein structure prediction field, there exist only very few tools for template-based RNA structure prediction. Therefore, we present a methodology for prediction of RNA three dimensional structure (target) utilizing a known secondary a tertiary structure of a related RNA molecule (template).
 
 ## HOW TO RUN LOCALY:
-The software is still in development, but cam be run on local pc. There are prepared data for one test prediction. Running this software is not recomended on local machine, expect for finding out how does it work or in case of simple predictions (software is designed to run many parallel predictions at on time which makes the prediction of large structures reasonably fast). 
+The software is still in development, but can be run on local pc. There are prepared data for single test prediction. Running this software is not recomended on local machine, expect for finding out how does it work or in case of simple predictions (software is designed to run many parallel predictions at one time, which makes the prediction of large structures reasonably fast). 
 
 ## Requirements
 1. UNIX-based operating system
