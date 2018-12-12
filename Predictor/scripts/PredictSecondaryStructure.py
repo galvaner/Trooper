@@ -5,9 +5,10 @@ import os
 
 class SecStrPredictor:
 
-    def __init__(self, target, template, outputDirectory):  # target, template like XXXX_A
+    def __init__(self, target, template, outputDirectory, run_on_windows):  # target, template like XXXX_A
         self.target = target
         self.template = template
+        self.run_on_windows = run_on_windows
         self.PREDICTED_TARGET_SECSTR = outputDirectory + self.target + '_predicted_sec_struct.secstr'
         self.TEMP_FOR_RNA_FOLD = outputDirectory + "template_secstr_fasta.temp"
         self.RNA_FOLD_SCRIPT = outputDirectory + "RNAfold_run.sh"
@@ -31,9 +32,11 @@ class SecStrPredictor:
         file.write('#!/bin/bash \n')
         file.write('RNAfold -C < ' + self.TEMP_FOR_RNA_FOLD + ' > ' + self.PREDICTED_TARGET_SECSTR)
         file.close()
-        #self.__windowsBashScriptCall__()
         #os.remove(self.RNA_FOLD_SCRIPT)
-        self.__unixBashScriptCall__()
+        if self.run_on_windows:
+            self.__windowsBashScriptCall__()
+        else:
+            self.__unixBashScriptCall__()
         #os.remove("SEQ__ss.ps") # RnaFold 'temp' file
 
 

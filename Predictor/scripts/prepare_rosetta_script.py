@@ -16,11 +16,9 @@ __author__ = 'Rasto'
 import argparse
 from Bio.PDB import *
 import os
-import PredictSecondaryStructure
 import config
 
-def prepare_rosetta_script(structures_number, chainID, target_length, dir, target, template ):
-    secStrObject = PredictSecondaryStructure.RunSecStrPRediction(target, template, dir) #  predict secondary structure
+def prepare_rosetta_script(structures_number, chainID, target_length, dir, secStrObject):
     # "end" line HAS TO be at the file end
     # load gaps into array and last residue, also shifts beginning and ending gaps
     file = open(dir+"cut_spheres/big_gaps.txt",'r')
@@ -136,9 +134,10 @@ def divide_into_smaller_seq_and_prepare_statements(excluded_gaps_array,
                 script_params = script_params + str(last_gap[1]) + "-" + str(section[1]) + " "
                 workingResPairs.append([last_gap[1], section[1]])
         print "WORKING_RES_PAIR" + str(workingResPairs)
-        addToMatchPairing = secStrObject.FixUnpairedChosenWorkingResidues(workingResPairs)  # secondary structure purpouse
-        print "RESULT: " + str(addToMatchPairing)
-        script_params += addToMatchPairing
+        if config.predictSecondaryStructure:
+            addToMatchPairing = secStrObject.FixUnpairedChosenWorkingResidues(workingResPairs)  # secondary structure purpouse
+            print "RESULT: " + str(addToMatchPairing)
+            script_params += addToMatchPairing
         file_for_statements.write(script_params + "\n")
     file_for_statements.close()
 
@@ -199,9 +198,10 @@ def prepare_statements_for_cut_spheres(statement_file="../files/prepared_stateme
         script_params = script_params + from_ + "-" + to_
         workingResPairs.append([int(from_), int(to_)])
         print "WORKING_RES_PAIR" + str(workingResPairs)
-        addToMatchPairing = secStrObject.FixUnpairedChosenWorkingResidues(workingResPairs) #  secondary structure purpouse
-        print "RESULT: " + str(addToMatchPairing)
-        script_params += addToMatchPairing
+        if config.predictSecondaryStructure:
+            addToMatchPairing = secStrObject.FixUnpairedChosenWorkingResidues(workingResPairs) #  secondary structure purpouse
+            print "RESULT: " + str(addToMatchPairing)
+            script_params += addToMatchPairing
         file_for_statements.write(script_params + "\n")
     file_for_statements.close()
 

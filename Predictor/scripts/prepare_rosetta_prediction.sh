@@ -1,7 +1,8 @@
 #!/bin/bash
 #import modules
 echo "++Importing modules...++"
-module add python-2.7.10-gcc python-2.7.10-intel
+#module add python-2.7.10-gcc python-2.7.10-intel
+module add debian8-compat
 module add python27-modules-gcc
 module add emboss-6.5.7
 module add viennaRNA-2.0.7
