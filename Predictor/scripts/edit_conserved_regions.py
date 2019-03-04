@@ -116,6 +116,7 @@ class SelectResidues(Select):
             return 1
         else:
             return 0
+
 def create_edited_pdb(residues_to_delete, template_target_mapping,input_pdb, output_pdb,chainID, model=0):
     parser_pdb = PDBParser()
     structure_1 = parser_pdb.get_structure('template_1', input_pdb)
@@ -127,15 +128,24 @@ def create_edited_pdb(residues_to_delete, template_target_mapping,input_pdb, out
     structure_2 = parser_pdb.get_structure('template_2', output_pdb + ".temp")
     model = structure_2[model]
     chain = model[chainID]
-    #renumber residues from template  to target (according to tt_alignment) has to be done after marked residues are deleted!!!
+    # renumber residues from template  to target (according to tt_alignment) has to be done after marked residues are deleted
+    # add and then subtract highest id to prevent conflicts in residues ids
+    max_residue_id = __get_max_residue_id__(chain)
     for residue in chain:
         for i in range(1, len(template_target_mapping)):
             if residue.id[1] ==  template_target_mapping[i][0]:
-                residue.id = (' ', template_target_mapping[i][1], ' ')
+                residue.id = (' ', template_target_mapping[i][1] + max_residue_id, ' ')
                 break
+    for residue in chain:
+        residue.id = (' ', residue.id[1] - max_residue_id, ' ')
     io_2 = PDBIO()
     io_2.set_structure(structure_2)
     io_2.save(output_pdb)
+
+
+def __get_max_residue_id__(chain):
+    return max(residue.id[1] for residue in chain)
+
 
 def create_lowercase_target_fasta_from_tta(target_fasta, name):
     #make target FASTA

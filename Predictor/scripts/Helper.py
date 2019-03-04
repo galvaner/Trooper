@@ -1,3 +1,7 @@
+from Bio import SeqIO
+from Bio.PDB import *
+
+
 # XXXX_anything, I want firts 4 characters in lowercase
 def TrimPDBName(fastaName):
     return fastaName[:4].lower()
@@ -11,17 +15,30 @@ def GetChainID(fastaName):
 def GetFastaNAmeFromFileName(fileName):
     return fileName[:6]
 
+
 CONST_SEC_STR_FOLDER = '../secondary_structures/'
+
 
 def __makeSecStrName__(rawName):
     return CONST_SEC_STR_FOLDER + rawName + ".secstr"
 
-#expects fastaName like XXXX_A.anything
-def LoadSecondaryStructureToString(fastaName):
+
+# expects fastaName like XXXX_A.anything
+# seondary structure is on second line
+def LoadSecondaryStructure(fastaName):
     rawName = GetFastaNAmeFromFileName(fastaName)
     with open(__makeSecStrName__(rawName), 'r') as file:
-        firstLine = file.next()
-    return firstLine
+        sequence_raw = file.readline()
+        sequence = ""
+        for res in sequence_raw:
+            if res.upper() in ('A', 'G', 'C', 'U'):
+                sequence += res.upper()
+        secondaryStructure_raw = file.readline()
+        secondaryStructure = ""
+        for res in secondaryStructure_raw:
+            if res.upper() in ('.', '(', ')', '[', ']'):
+                secondaryStructure += res.upper()
+    return {'sequence': sequence, 'sec_str': secondaryStructure}
 
 
 def ListOfPairsToFiles(zeroIndexFileName, listOfPairs):
@@ -34,23 +51,19 @@ def ListOfPairsToFiles(zeroIndexFileName, listOfPairs):
         fileZero.write(pair[1])
     fileZero.close()
 
+
 # compare order of fasta file and corresponding pdb file
-def check_order_of_fasta_and_pdb(input_pdb, chainID, fasta, fasta_shift = 0):
-    #global cashe
-    #if fasta in cashe:
-    #    return True
-    from Bio import SeqIO
-    from Bio.PDB import *
+def check_order_of_fasta_and_pdb(input_pdb, chain_id, fasta, fasta_shift=0):
     parser_pdb = PDBParser()
     structure = parser_pdb.get_structure('self', input_pdb)
     model = structure[0]
-    chain = model[chainID]
+    chain = model[chain_id]
     records = list(SeqIO.parse(fasta, "fasta"))
     fasta_seq = ""
     for r in records[0]:
         fasta_seq = fasta_seq + r
     fasta_seq = "x"+fasta_seq+"x"
-    for i in range(0,fasta_shift):
+    for i in range(0, fasta_shift):
         fasta_seq = "y" + fasta_seq
     b = True
     for res in chain:
@@ -61,17 +74,34 @@ def check_order_of_fasta_and_pdb(input_pdb, chainID, fasta, fasta_shift = 0):
             b = False
     return b
 
-def modify_pdb(pdb, chainID, dir_ = './', run_on_winows = False):
-    file = open("script_modify_pdb.sh", 'wb')
-    file.write('#!/bin/bash')
-    file.write('\ngrep "^ATOM.................'+chainID + '" ' + pdb + ' > ' + dir_ + 'template.pdb' )
-    file.close()
-    import subprocess
-    if run_on_winows:
-        subprocess.call(['C:\\Cygwin\\bin\\sh', './script_modify_pdb.sh'], shell=True)
-    else:
-        subprocess.call(['chmod', '+x' , 'script_modify_pdb.sh'])
-        subprocess.call(['./script_modify_pdb.sh'])
+
+# select only ATOM lines with correct chain_id to template
+def select_relevant_chain_from_template_pdb(pdb, chain_id):
+    import re
+    with open("template.pdb", "wb") as modified_pdb:
+        with open(pdb, 'r') as original_pdb:
+            for line in original_pdb.readlines():
+                if re.match('ATOM.................'+chain_id, line):
+                    modified_pdb.write(line)
+
+
+
+def load_fasta(fasta_file):
+    from Bio import SeqIO
+    FastaFile = open("../fastas/" + fasta_file.upper() + ".fasta", 'rU')
+    for rec in SeqIO.parse(FastaFile, 'fasta'):
+        name = rec.id
+        seq = rec.seq
+        seqLen = len(rec)
+    FastaFile.close()
+    return seq
+
+
+
+# Inserts new inside original at pos.
+def insert_char_to_str(original, new, pos):
+    return original[:pos] + new + original[pos:]
+
 
 class bcolors:
     HEADER = '\033[95m'

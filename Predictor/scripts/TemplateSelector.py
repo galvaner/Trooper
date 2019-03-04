@@ -4,7 +4,7 @@ import EmbossNeedle
 
 # returns the best suitable templates in array
 # targetFastaName like "46XY_A"
-def SelectTemplate(targetFastaName, similarity_min = 50, similarity_max = 90, can_return_itself = False, chose_only_not_similar_templates = True, maximal_similarity_between_templates = 90, number_of_templates_to_return = 3, debug = False):
+def SelectTemplate(targetFastaName, similarity_min = 50, similarity_max = 90, can_return_itself = False, chose_only_not_similar_templates = True, maximal_similarity_between_templates = 90, number_of_templates_to_return = 3, debug = False, run_on_windows=False):
     suitable_templates = []
     for fastaFile in os.listdir('../fastas/'):
         potential_template = Helper.GetFastaNAmeFromFileName(fastaFile)
@@ -23,7 +23,7 @@ def SelectTemplate(targetFastaName, similarity_min = 50, similarity_max = 90, ca
             is_suitable = __compare_with_already_chosen_templates__(suitable_templates, potential_template, maximal_similarity_between_templates, debug)
             if not is_suitable:
                 continue
-        Helper.modify_pdb('../pdbs/' + potential_template + ".pdb", Helper.GetChainID(potential_template))
+        Helper.select_relevant_chain_from_template_pdb('../pdbs/' + Helper.TrimPDBName(potential_template) + ".pdb", Helper.GetChainID(potential_template))
         if not Helper.check_order_of_fasta_and_pdb('./template.pdb', Helper.GetChainID(potential_template), '../fastas/' + fastaFile):
             continue
 

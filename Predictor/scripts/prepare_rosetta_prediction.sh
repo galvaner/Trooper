@@ -15,7 +15,7 @@ echo "++Starting prediction loop++"
 for pairs in ../pairs/*; do
 	filename=$(echo $pairs | cut -d/ -f3 | cut -d. -f1)
 	echo "	Starting python script for bucket ${filename}" 
-	python connect_scripts.py -f ${pairs}
+	python connect_scripts.py -f ${pairs} -w False
 	rm -rf ../prediction/${filename}
 	mkdir ../prediction/${filename}
 	mv ../prediction/????_?_????_? ../prediction/${filename}

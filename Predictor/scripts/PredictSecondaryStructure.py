@@ -1,6 +1,6 @@
 import EmbossNeedle
 import Helper
-import os
+import config
 
 
 class SecStrPredictor:
@@ -42,7 +42,7 @@ class SecStrPredictor:
 
     def __windowsBashScriptCall__(self):
         import subprocess
-        subprocess.call(['C:\\cygwin64\\bin\\bash', './' + self.RNA_FOLD_SCRIPT], shell=True)
+        subprocess.call([config.pathToCygwin, './' + self.RNA_FOLD_SCRIPT], shell=True)
 
     def __unixBashScriptCall__(self):
         import subprocess
@@ -111,22 +111,23 @@ class SecStrPredictor:
         return numberedAln
 
     def __enrichTemplateAlnWithSecondaryStructureAndTargetAln__(self, numberedAln):  # returns: [templateResidue, indexOfTemplResBeforeAln, secStr, targetResidue]
-        secStr = Helper.LoadSecondaryStructureToString(self.template)
-        self.__checkIfBracketsArePairedGiveStr__(secStr)
+        secStr = Helper.LoadSecondaryStructure(self.template)
+        self.__alignSecStrWithFasta__(secStr, self.template)
+        self.__checkIfBracketsArePairedGiveStr__(secStr['sec_str'])
         enrichedSeqence = []
-        __bracketSequence = ""
-        __notBrackedSequence = ""
+        bracketSequence = ''
+        notBrackedSequence = ''
         positionInAln = 0
         for pair in numberedAln:
             if pair[0] != '-':
-                enrichedSeqence.append([pair[0], pair[1], secStr[pair[1] - 1], self.aln['target'][positionInAln]])  # [A, 5, (]
-                __bracketSequence += secStr[pair[1] - 1]
-                __notBrackedSequence = __notBrackedSequence + str(pair[1]) + " "
+                enrichedSeqence.append([pair[0], pair[1], secStr['sec_str'][pair[1] - 1], self.aln['target'][positionInAln]])  # [A, 5, (]
+                bracketSequence = bracketSequence + secStr['sec_str'][pair[1] - 1]
+                notBrackedSequence = notBrackedSequence + str(pair[1]) + " "
             else:
                 enrichedSeqence.append(['-', '-', '-', self.aln['target'][positionInAln]])
             positionInAln += 1
         #print  __notBrackedSequence
-        self.__checkIfBracketsArePairedGiveStr__(__bracketSequence)
+        self.__checkIfBracketsArePairedGiveStr__(bracketSequence)
         return enrichedSeqence
 
     def __checkIfBracketsArePaired__(self):
@@ -233,11 +234,31 @@ class SecStrPredictor:
                 return i
         raise Exception("Inpaired brckets")
 
+    # expects, that secstru has less residues than fasta
+    # and add dots (no pairing) to sec struct
+    def __alignSecStrWithFasta__(self, secStr, fasta):
+        fasta = Helper.load_fasta(fasta)
+        i = 0
+        fasta_str = ""
+        for residue in fasta:
+            fasta_str += residue
+            if residue != secStr['sequence'][i]:
+                secStr['sequence'] = Helper.insert_char_to_str(secStr['sequence'], '.', i)
+                secStr['sec_str'] = Helper.insert_char_to_str(secStr['sec_str'], '.', i)
+            i += 1
+            if i >= len(fasta) or i >= len(secStr['sequence']):
+                break
+
+
+        with open("./secstr_check_aln.info", 'w') as file:
+            file.write(fasta_str + '\n')
+            file.write(secStr['sequence'] + '\n')
+            file.write(secStr['sec_str'] + '\n')
 
 
 
-def RunSecStrPRediction(target, template, outputDirectory):  # "2GIS_A", "3V7E_D"
-    myPred = SecStrPredictor(target, template, outputDirectory)
+def RunSecStrPRediction(target, template, outputDirectory, run_on_windows):  # "2GIS_A", "3V7E_D"
+    myPred = SecStrPredictor(target, template, outputDirectory, run_on_windows)
     return myPred
 
 # object = RunSecStrPRediction("3V7E_C", "2GIS_A", "./")

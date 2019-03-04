@@ -58,7 +58,7 @@ class SecondTemplateUsage:
                 propsToBeUsedFromTemplateSelection.append(gapProps)
         return propsToBeUsedFromTemplateSelection
 
-    def __prepareTemplateGapProps__(self, startGap, endGap):
+    def __prepareTemplateGapProps__(self, startGap, endGap, superposition_with_number_of_residues=3):
         # map the gap to alignment
         startGapInAln = None
         endGapInAln = None
@@ -79,6 +79,7 @@ class SecondTemplateUsage:
         beforeGap = 0
         afterGap = 0
         templateIndexesToConnectTheGap = []
+        targetIndexesToConnectTheGap = []
         if startGapInAln == 0:
             isStart = True
         else:
@@ -87,26 +88,29 @@ class SecondTemplateUsage:
             isEnd = True
         else:
             isEnd = False
-        for i in range(startGapInAln - 4, startGapInAln):
+        for i in range(startGapInAln - superposition_with_number_of_residues, startGapInAln):
             if i < 0:
                 continue
             if self.numberedAnotatedTemplate[i][3]:
                 beforeGap += 1
                 templateIndexesToConnectTheGap.append(self.numberedAnotatedTemplate[i][1])
-        for i in range(endGapInAln, endGapInAln + 4):
+                targetIndexesToConnectTheGap.append(self.numberedAnotatedTemplate[i][2])
+        for i in range(endGapInAln, endGapInAln + superposition_with_number_of_residues + 1):
             if i > (len(self.numberedAnotatedTemplate) - 1):
                 continue
             if self.numberedAnotatedTemplate[i][3]:
                 afterGap += 1
                 templateIndexesToConnectTheGap.append(self.numberedAnotatedTemplate[i][1])
+                targetIndexesToConnectTheGap.append(self.numberedAnotatedTemplate[i][2])
         return {"isStart": isStart, "isEnd": isEnd, "beforeGap": beforeGap, "afterGap": afterGap,
                 "templateIndexesToConnectTheGap": templateIndexesToConnectTheGap,
                 "templateIndexesToFillTheGap": templateIndexesToFillTheGap,
+                "targetIndexesToConnectTheGap": targetIndexesToConnectTheGap,
                 "gapCoverage": gapCoverageBySecondTempalte}
 
     def __decideIfTemplateCanBeUsedForGap__(self, gapProperties, gapLength):
         # important "if" - decides the conditions for acceptance of secondary template
-        if (((gapProperties["gapCoverage"] / gapLength) < 0.5)  # TODO: set the boundary for template acceptance
+        if (((gapProperties["gapCoverage"] / float(gapLength)) < 0.5)  # TODO: set the boundary for template acceptance
                 or (gapProperties["beforeGap"] == 0 and not gapProperties["isStart"])
                 or (gapProperties["afterGap"] == 0 and not gapProperties["isEnd"])
                 or ((gapProperties["beforeGap"] + gapProperties["afterGap"]) <= 3)):
@@ -126,7 +130,8 @@ class SecondTemplateUsage:
                     superposition.Merge(toStruct=self.originalReadyForRosettaStruct,
                                         fromStruct="../pdbs/" + Helper.TrimPDBName(self.template) + ".pdb",
                                         inGapRes=props['templateIndexesToFillTheGap'],
-                                        connectorsRes=props['templateIndexesToConnectTheGap'],
+                                        connectorsRes_template=props['templateIndexesToConnectTheGap'],
+                                        connectorsRes_target=props['targetIndexesToConnectTheGap'],
                                         chainIdFrom=self.chainID,
                                         originalTemplateChainId=self.originalTemplateChainId)
                 except:

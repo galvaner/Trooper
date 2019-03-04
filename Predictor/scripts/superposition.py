@@ -28,10 +28,10 @@ from Bio.PDB import *
 
 
 # Start the parser
-def Merge(toStruct, fromStruct, inGapRes, connectorsRes, chainIdFrom, originalTemplateChainId):
+def Merge(toStruct, fromStruct, inGapRes, connectorsRes_target, connectorsRes_template, chainIdFrom, originalTemplateChainId):
   temp = "temp.pdb"
-  atoms_to_be_aligned = connectorsRes
-  createTempSampleStruct(temp, fromStruct, chainIdFrom, inGapRes+connectorsRes, originalTemplateChainId)
+  #atoms_to_be_aligned = connectorsRes_target
+  createTempSampleStruct(temp, fromStruct, chainIdFrom, inGapRes+connectorsRes_target, originalTemplateChainId)
   pdb_parser = Bio.PDB.PDBParser(QUIET = True)
 
   # Get the structures
@@ -53,14 +53,14 @@ def Merge(toStruct, fromStruct, inGapRes, connectorsRes, chainIdFrom, originalTe
     # Iterate of all residues in each model in order to find proper atoms
     for ref_res in ref_chain:
       # Check if residue number ( .get_id() ) is in the list
-      if ref_res.get_id()[1] in atoms_to_be_aligned:
+      if ref_res.get_id()[1] in connectorsRes_target:
         # Append CA atom to list
         ref_atoms.append(ref_res['P'])
 
   # Do the same for the sample structure
   for sample_chain in sample_model:
     for sample_res in sample_chain:
-      if sample_res.get_id()[1] in atoms_to_be_aligned:
+      if sample_res.get_id()[1] in connectorsRes_template:
         sample_atoms.append(sample_res['P'])
 
   CheckIfAtomsArePaired(ref_atoms, sample_atoms)
