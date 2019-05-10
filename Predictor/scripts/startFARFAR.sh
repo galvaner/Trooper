@@ -60,13 +60,18 @@ for filename in ./*/*/files/*.fasta; do
 	cd ../../..
 done
 
-for filename in ./*/*/files/*.secstr; do
-	predictionDirname1=$(echo $filename | cut -f 2 -d '/')
-	predictionDirname2=$(echo $filename | cut -f 3 -d '/')
-	cd $predictionDirname1/$predictionDirname2/rosetta
-	cp ../../../$filename .
-	cd ../../..
-done
+export SecStrExists=${predictSecondaryStructure}
+SecStrExists=$(echo "$SecStrExists" | tr '[:upper:]' '[:lower:]')
+if $SecStrExists; then
+	for filename in ./*/*/files/*.secstr; do
+		predictionDirname1=$(echo $filename | cut -f 2 -d '/')
+		predictionDirname2=$(echo $filename | cut -f 3 -d '/')
+		cd $predictionDirname1/$predictionDirname2/rosetta
+		cp ../../../$filename .
+		cd ../../..
+	done;
+else echo "Secondary structure not used in prediction";
+fi
 
 # run start_prediction.sh for each target-template pair
 

@@ -21,6 +21,7 @@ import config
 def prepare_rosetta_script(structures_number, chainID, target_length, dir, secStrObject):
     # "end" line HAS TO be at the file end
     # load gaps into array and last residue, also shifts beginning and ending gaps
+    print "PREPARE_ROSETTA_SCRIPT: start"
     file = open(dir+"cut_spheres/big_gaps.txt",'r')
     line = file.readline()
     excluded_gaps_array = []
@@ -48,6 +49,8 @@ def prepare_rosetta_script(structures_number, chainID, target_length, dir, secSt
                                        chainID,
                                        0,
                                        secStrObject)
+    print "PREPARE_ROSETTTA_SCRIPT: end"
+
 
 class SelectResidues(Select):
     def __init__(self, accept_boundaries, chain_id):
@@ -102,7 +105,12 @@ def divide_into_smaller_seq_and_prepare_statements(excluded_gaps_array,
 
     for section in section_array:
         first_gap = True
-        script_params = "rna_denovo_setup.py -fasta " + fasta_name + " -s " + str(section[0]) + "_" + str(section[1]) + ".pdb -fixed_stems -nstruct " + str(structures_to_generate) + " -secstruct_file ../secstruForRosetta.secstr" + " -working_res " # be aware that one shell scripts extract path from this file...
+        if secStrObject is None:
+            script_params = "rna_denovo_setup.py -fasta " + fasta_name + " -s " + str(section[0]) + "_" + str(
+                section[1]) + ".pdb -fixed_stems -nstruct " + str(
+                structures_to_generate) + " -working_res "
+        else:
+            script_params = "rna_denovo_setup.py -fasta " + fasta_name + " -s " + str(section[0]) + "_" + str(section[1]) + ".pdb -fixed_stems -nstruct " + str(structures_to_generate) + " -secstruct_file ../secstruForRosetta.secstr" + " -working_res " # be aware that one shell scripts extract path from this file...
         workingResPairs = []
         last_gap = section
         for gap in excluded_gaps_array:
@@ -166,7 +174,11 @@ def prepare_statements_for_cut_spheres(statement_file="../files/prepared_stateme
         seq_length = 0
         first_cycle = True
         workingResPairs = []
-        script_params = "rna_denovo_setup.py -fasta " + fasta + " -s " + input_pdb + " -fixed_stems -nstruct " + str(structures_to_generate) + " -secstruct_file ../secstruForRosetta.secstr" + " -working_res "
+        if secStrObject is None:
+            script_params = "rna_denovo_setup.py -fasta " + fasta + " -s " + input_pdb + " -fixed_stems -nstruct " + str(
+                structures_to_generate) + " -working_res "
+        else:
+            script_params = "rna_denovo_setup.py -fasta " + fasta + " -s " + input_pdb + " -fixed_stems -nstruct " + str(structures_to_generate) + " -secstruct_file ../secstruForRosetta.secstr" + " -working_res "
         for residue in chain:
             current = residue.id[1]
             if first_cycle:

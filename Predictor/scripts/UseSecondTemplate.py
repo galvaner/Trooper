@@ -10,12 +10,14 @@ from Bio.PDB import *
 
 
 class SecondTemplateUsage:
+    """Global alignment not functioning branch"""
     longGaps = []
     enrichedGaps = []
     pdb_directory = "pdbs/"
     modelID = 0
     CONST_FASTAS_DIR = "../fastas/"
     CONST_FASTA_FILE_TYPE = ".fasta"
+    LONG_GAP_LOW_LIMIT = 20
 
     def __init__(self, originalReadyForRosettaStruct, target, secondaryTemplate, primaryTemplateChainId):
         self.target = target
@@ -23,10 +25,12 @@ class SecondTemplateUsage:
         self.template = secondaryTemplate
         self.chainID = Helper.GetChainID(secondaryTemplate)
         self.originalReadyForRosettaStruct = originalReadyForRosettaStruct
-        with EmbossNeedle.MyEmboss(self.target, self.template) as myEmboss:
-            self.aln = myEmboss.GetAlignment()
-        self.longGaps = self.__findLongGaps__(20)  # TODO: set the minimal "big gap" size
-        self.enrichedGaps = self.__tryToFillLongGapsFromAnotherTemplate__()
+        with EmbossNeedle.MyEmboss(self.target, self.template, "local") as myEmboss:
+            #Todo: objekt Aln je iny obsahuje lokalne zarovnanie
+            self.aln = myEmboss.ParseLocalAlignment()
+        self.longGaps = self.__findLongGaps__(self.LONG_GAP_LOW_LIMIT)  # TODO: set the minimal "big gap" size
+        '''self.enrichedGaps = self.__tryToFillLongGapsFromAnotherTemplate__()'''
+        self.__fillGapsFromLocalAlignment__()
         print self.enrichedGaps
 
     def __findLongGaps__(self,  minimalGapLength):
@@ -50,6 +54,7 @@ class SecondTemplateUsage:
         return gaps
 
     def __getResiduesWhichCanBeUSedFromSecondTemplate__(self):
+        """Global alignment method do not use!"""
         self.numberedAnotatedTemplate = self.__annotateSecTemplateAlignment__()
         propsToBeUsedFromTemplateSelection = []
         for gap in self.longGaps:
@@ -118,7 +123,17 @@ class SecondTemplateUsage:
         else:
             return True
 
+    def __fillGapsFromLocalAlignment__(self):
+        self.numberedAnotatedTemplate = self.__annotateSecTemplateAlignment__()
+        propsToBeUsedFromTemplateSelection = []
+        for gap in self.longGaps:
+            gapProps = self.__prepareTemplateGapProps__(gap[0], gap[1])
+            if self.__decideIfTemplateCanBeUsedForGap__(gapProps, gap[2]):
+                propsToBeUsedFromTemplateSelection.append(gapProps)
+        return propsToBeUsedFromTemplateSelection
+
     def __tryToFillLongGapsFromAnotherTemplate__(self):
+        """Global alignment method do not use!"""
         # if possible fill the empty gaps
         #self.__coverLongGapsFromSecondaryTemplate__()
         residuesToAdd = self.__getResiduesWhichCanBeUSedFromSecondTemplate__()
@@ -127,13 +142,13 @@ class SecondTemplateUsage:
     def callSuperpositionMethod(self, residuesToAdd):
             for props in residuesToAdd:
                 try:
-                    superposition.Merge(toStruct=self.originalReadyForRosettaStruct,
-                                        fromStruct="../pdbs/" + Helper.TrimPDBName(self.template) + ".pdb",
-                                        inGapRes=props['templateIndexesToFillTheGap'],
-                                        connectorsRes_template=props['templateIndexesToConnectTheGap'],
-                                        connectorsRes_target=props['targetIndexesToConnectTheGap'],
-                                        chainIdFrom=self.chainID,
-                                        originalTemplateChainId=self.originalTemplateChainId)
+                    superposition.Merge(target_name=self.originalReadyForRosettaStruct,
+                                        template_name="../pdbs/" + Helper.TrimPDBName(self.template) + ".pdb",
+                                        fill_gap_template_ids=props['templateIndexesToFillTheGap'],
+                                        target_connector_residue_ids=props['templateIndexesToConnectTheGap'],
+                                        template_connector_residue_ids=props['targetIndexesToConnectTheGap'],
+                                        template_chain_id=self.chainID,
+                                        target_chain_id=self.originalTemplateChainId)
                 except:
                     print "EXCEPTION: Template fragment could not be aded to original template structure."
 

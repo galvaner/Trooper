@@ -28,14 +28,15 @@ from Bio.PDB import *
 
 
 # Start the parser
-def Merge(toStruct, fromStruct, inGapRes, connectorsRes_target, connectorsRes_template, chainIdFrom, originalTemplateChainId):
+def Merge(target_name, template_name, fill_gap_template_ids, template_connector_residue_ids, target_connector_residue_ids, template_chain_id, target_chain_id):
   temp = "temp.pdb"
-  #atoms_to_be_aligned = connectorsRes_target
-  createTempSampleStruct(temp, fromStruct, chainIdFrom, inGapRes+connectorsRes_target, originalTemplateChainId)
+  # get only the first in from tuple (its residue id in template structure)
+  fill_gap_template_ids_original_ids = [i[0] for i in fill_gap_template_ids]
+  createTempSampleStruct(temp, template_name, template_chain_id, fill_gap_template_ids_original_ids + template_connector_residue_ids, target_chain_id)
   pdb_parser = Bio.PDB.PDBParser(QUIET = True)
 
   # Get the structures
-  ref_structure = pdb_parser.get_structure("reference", toStruct)
+  ref_structure = pdb_parser.get_structure("reference", target_name)
   sample_structure = pdb_parser.get_structure("sample", temp)
 
   # Use the first model in the pdb-files for alignment
@@ -53,14 +54,14 @@ def Merge(toStruct, fromStruct, inGapRes, connectorsRes_target, connectorsRes_te
     # Iterate of all residues in each model in order to find proper atoms
     for ref_res in ref_chain:
       # Check if residue number ( .get_id() ) is in the list
-      if ref_res.get_id()[1] in connectorsRes_target:
+      if ref_res.get_id()[1] in target_connector_residue_ids:
         # Append CA atom to list
         ref_atoms.append(ref_res['P'])
 
   # Do the same for the sample structure
   for sample_chain in sample_model:
     for sample_res in sample_chain:
-      if sample_res.get_id()[1] in connectorsRes_template:
+      if sample_res.get_id()[1] in template_connector_residue_ids:
         sample_atoms.append(sample_res['P'])
 
   CheckIfAtomsArePaired(ref_atoms, sample_atoms)
@@ -78,22 +79,46 @@ def Merge(toStruct, fromStruct, inGapRes, connectorsRes_target, connectorsRes_te
   io.set_structure(sample_structure)
   #io.set_structure(ref_structure)
   #io.save(toStruct + ".rotated.out")
-  ConnectAndSaveAlignedTemplateToOriginalTemplate(toStruct, sample_structure, ref_structure, inGapRes, originalTemplateChainId)
+  ConnectAndSaveAlignedTemplateToOriginalTemplate(target_name, sample_structure, ref_structure, fill_gap_template_ids, target_chain_id)
+
 
 def ConnectAndSaveAlignedTemplateToOriginalTemplate(toStruct, sample_structure, ref_structure, atomsFromSampleStrToSave, commonChainID):
     for sampleRes in sample_structure[0][commonChainID]:
-        if IsNumberInList(sampleRes.id[1], atomsFromSampleStrToSave):
-            ref_structure[0][commonChainID].add(sampleRes)
+        new_residue_id = CheckIsNumberInListAndReturnNewId(sampleRes.id[1], atomsFromSampleStrToSave)
+        if new_residue_id != -1:
+            # renumber added ids
+            residue_to_copy = sampleRes
+            if new_residue_id != residue_to_copy.id[1]:
+                residue_to_copy.detach_parent()
+                residue_to_copy.id = (' ', new_residue_id, ' ')
+            ref_structure[0][commonChainID].add(residue_to_copy)
+
+    #remove residues like "RIA", because rosetta can not work with them
+    for res in ref_structure[0][commonChainID]:
+        if (res.id[0] != '' and res.id[0] != ' ') or (res.id[2] != '' and res.id[0] != ' '):
+            ref_structure[0][commonChainID].detach_child(res.id)
+
+    # sort structure
     ref_structure[0][commonChainID].child_list.sort(key=lambda x: x.id[1])
+
+    ## gaps in structure has to be longer than 1 residue (else rosetta wont find any fragment in its library)
+    #last_res_id = 1
+    #for res in ref_structure[0][commonChainID]:
+    #    if res.id[1] == last_res_id + 2:
+    #        ref_structure[0][commonChainID].detach_child(res.id)
+    #    else:
+    #        last_res_id = res.id[1]
+
     io = Bio.PDB.PDBIO()
     io.set_structure(ref_structure)
     io.save(toStruct)
 
-def IsNumberInList(number, list):
+
+def CheckIsNumberInListAndReturnNewId(number, list):
     for listElement in list:
-        if  listElement == number:
-            return True
-    return False
+        if listElement[0] == number:
+            return listElement[1]
+    return -1
 
 def CheckIfAtomsArePaired(ref_atoms, sample_atoms): #, firstGapRes, lastGapRes):
     ref_atoms.sort(key=lambda x: x.parent.id[1], reverse=True)

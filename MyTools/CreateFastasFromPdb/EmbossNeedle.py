@@ -1,13 +1,12 @@
 from Bio.Emboss.Applications import *
 import os
-import align
 from Bio import AlignIO
 import re
 
 
 class MyEmboss:
     '''Compute global or local fasta files alignment and provide functions to get results (aligned sequences, aln similarity percentage, aln gap percentage)'''
-    CONST_FASTAS_DIR = "../fastas/"  # "./fasta_secstr/"
+    CONST_FASTAS_DIR = "./fastas/"  # "./fasta_secstr/"
     CONST_FASTA_FILE_TYPE = ".fasta"
     CONST_TEMP_ALN_FILE_NAME = "aln.emboss"
 
@@ -17,11 +16,11 @@ class MyEmboss:
         self.gapOpen = gapOpen
         self.gapExtend = gapExtend
         if target_fasta_file == "":
-            self.inputTargetFile = self.CONST_FASTAS_DIR + str.upper(targetFastaName) + self.CONST_FASTA_FILE_TYPE
+            self.inputTargetFile = self.CONST_FASTAS_DIR + targetFastaName + self.CONST_FASTA_FILE_TYPE
         else:
             self.inputTargetFile = target_fasta_file
         if template_fasta_file == "":
-            self.inputTemplateFile = self.CONST_FASTAS_DIR + str.upper(templateFastaName) + self.CONST_FASTA_FILE_TYPE
+            self.inputTemplateFile = self.CONST_FASTAS_DIR + templateFastaName + self.CONST_FASTA_FILE_TYPE
         else:
             self.inputTemplateFile = template_fasta_file
         if typeOfAlignemnt == 'local':
@@ -36,10 +35,6 @@ class MyEmboss:
         os.remove(self.CONST_TEMP_ALN_FILE_NAME)
 
     def __computeGlobalAlignment__(self):
-        if not os.path.isfile(self.inputTargetFile):
-            raise Exception("EMBOSS.NEEDLE: Target fasta file does not exists (" + self.inputTargetFile + ")")
-        if not os.path.isfile(self.inputTemplateFile):
-            raise Exception("EMBOS.NEEDLE:  Template fasta file does not exists (" + self.inputTemplateFile + ")")
         try:
             needle_cli = NeedleCommandline(asequence=self.inputTargetFile, \
                                    bsequence=self.inputTemplateFile, \
@@ -88,12 +83,7 @@ class MyEmboss:
 
     def GetSimilarity(self):
         similarity = self.__regexpForSimilarityOrGap__('Similarity')
-        similarity_float = 0
-        try:
-            similarity_float = float(similarity)
-        except:
-            similarity_float = 0
-        return similarity_float
+        return similarity
 
 
     def GetGaps(self):
@@ -107,16 +97,8 @@ class MyEmboss:
         template = list(align[1].seq)
         return {'target': target, 'template': template}
 
-
-    def ParseLocalAlignment(self):
-        """call parsing alignment from old alignment class because we need indexes of alignment"""
-        #alnObject = align.parse_alignment(self.CONST_TEMP_ALN_FILE_NAME, self.targetFastaName, self.templateFastaName, False)
-        #return alnObject
-        raise Exception("Not implemented - no need anymore...")
-
     def ParseSemiGlobalAlignment(self):
         """Get similarity and indexes to template in alignment a-sequence must be target, b-sequence must be template"""
-        """Ignore X residues"""
         import re
         alignment_file = open(name=self.CONST_TEMP_ALN_FILE_NAME, mode='r')
         a_seq = ''
@@ -126,11 +108,9 @@ class MyEmboss:
         matched_b_seq = None
         for line in alignment_file:
             if matched_a_seq is None:
-                #matched_a_seq = re.match('^[A-Za-z]* *([0-9]+) *([A-Za-z-]*) *([0-9]+)$', line)
                 matched_a_seq = re.match('^[A-Za-z]* *([0-9]+) *([A-Za-z-]*) *([0-9]+)$', line)
                 continue
             if matched_b_seq is None:
-                #matched_b_seq = re.match('^[A-Za-z]* *([0-9]+) *([A-Za-z-]*) *([0-9]+)$', line)
                 matched_b_seq = re.match('^[A-Za-z]* *([0-9]+) *([A-Za-z-]*) *([0-9]+)$', line)
             if matched_a_seq and matched_b_seq:
                 if int(matched_a_seq.group(1)) > 0 and int(matched_a_seq.group(1)) != int(matched_a_seq.group(3)):

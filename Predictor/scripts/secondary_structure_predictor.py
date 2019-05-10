@@ -5,10 +5,9 @@ import config
 
 class SecStrPredictor:
 
-    def __init__(self, target, template, outputDirectory, run_on_windows):  # target, template like XXXX_A
+    def __init__(self, target, template, outputDirectory):  # target, template like XXXX_A
         self.target = target
         self.template = template
-        self.run_on_windows = run_on_windows
         self.PREDICTED_TARGET_SECSTR = outputDirectory + self.target + '_predicted_sec_struct.secstr'
         self.TEMP_FOR_RNA_FOLD = outputDirectory + "template_secstr_fasta.temp"
         self.RNA_FOLD_SCRIPT = outputDirectory + "RNAfold_run.sh"
@@ -33,7 +32,7 @@ class SecStrPredictor:
         file.write('RNAfold -C < ' + self.TEMP_FOR_RNA_FOLD + ' > ' + self.PREDICTED_TARGET_SECSTR)
         file.close()
         #os.remove(self.RNA_FOLD_SCRIPT)
-        if self.run_on_windows:
+        if config.run_on_windows:
             self.__windowsBashScriptCall__()
         else:
             self.__unixBashScriptCall__()
@@ -257,8 +256,10 @@ class SecStrPredictor:
 
 
 
-def RunSecStrPRediction(target, template, outputDirectory, run_on_windows):  # "2GIS_A", "3V7E_D"
-    myPred = SecStrPredictor(target, template, outputDirectory, run_on_windows)
+def RunSecStrPRediction(target, template, outputDirectory):  # "2GIS_A", "3V7E_D"
+    print "SECONDARY_STRUCTURE_MODUL: start"
+    myPred = SecStrPredictor(target, template, outputDirectory)
+    print "SECONDARY_STRUCTURE_MODUL: end"
     return myPred
 
 # object = RunSecStrPRediction("3V7E_C", "2GIS_A", "./")

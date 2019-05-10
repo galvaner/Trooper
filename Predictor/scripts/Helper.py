@@ -1,5 +1,6 @@
 from Bio import SeqIO
 from Bio.PDB import *
+import os
 
 
 # XXXX_anything, I want firts 4 characters in lowercase
@@ -53,7 +54,13 @@ def ListOfPairsToFiles(zeroIndexFileName, listOfPairs):
 
 
 # compare order of fasta file and corresponding pdb file
-def check_order_of_fasta_and_pdb(input_pdb, chain_id, fasta, fasta_shift=0):
+def is_fast_and_pdb_ordered_correctly(input_pdb, chain_id, fasta, fasta_shift=0):
+    if not os.path.isfile(input_pdb):
+        print 'ERROR: file' + input_pdb + " does not exists."
+        return False
+    if not os.path.isfile(fasta):
+        print 'ERROR: file' + fasta + " does not exists."
+        return False
     parser_pdb = PDBParser()
     structure = parser_pdb.get_structure('self', input_pdb)
     model = structure[0]

@@ -20,6 +20,7 @@ import numpy as np
 
 # misterious constant is constant which says how each residue is aprox long (take the middle between two residues nad to the sphere take every residues which lies in #missingRes*mysteriousConstant)
 def cut_spheres(input_pdb, target_length,  path_to_output, chainID, mysterious_constant=2.5, minimum_gap_length = 5, modelID = 0):
+    print "CUT_SPHERES: start"
     parser_pdb = PDBParser()
     structure = parser_pdb.get_structure('self', input_pdb)
     model = structure[modelID]
@@ -75,6 +76,7 @@ def cut_spheres(input_pdb, target_length,  path_to_output, chainID, mysterious_c
     for i  in range(0,last_residue_index+100):
         choose_residue.append(False)
     print "Last residue number from conserved_edited_template.pdb: " + str(last_residue_index)
+    print "CUT_SPHERES: end"
 
     for i in range(0,middles.__len__()):
         #accepted = 0 #debug

@@ -1,3 +1,5 @@
+from align import parse_alignment
+
 __author__ = 'Rasto'
 
 #------------------
@@ -13,8 +15,6 @@ __author__ = 'Rasto'
 # Try add a dependency on the gap length.
 #------------------
 
-import re
-import argparse
 from Bio.PDB import *
 
 
@@ -27,31 +27,8 @@ def handle_gap(residues_to_delete_list, gap_length, from_res): #deletes half of 
         residues_to_delete_list.append(i)
 
 
-
-def prepare_alignment_data(alignment_file_name, target_name, template_name):
-    alignment_file = open(name = alignment_file_name, mode = 'r')
-    template_seq = 'x'
-    target_seq = 'x'
-    for line in alignment_file:
-        matched_temp = re.match('^'+template_name+' *([A-Za-z-]*) *', line)
-        matched_trgt = re.match('^'+target_name+' *([A-Za-z-]*) *', line)
-        if matched_temp:
-            template_seq += matched_temp.group(1)
-        if matched_trgt:
-            target_seq += matched_trgt.group(1)
-    alignment_file.close()
-    print "Template alignment length: " + str(len(template_seq)-1)
-    print "Target alignment length: " + str(len(target_seq)-1)
-    return data(template_seq, target_seq, None, None)
-
-class data(object):
-    def __init__(self, template_fasta_alignment, target_fasta_alignment, window_size, match_lower_bound ):
-        self.template_fasta_alignment = template_fasta_alignment
-        self.target_fasta_alignment = target_fasta_alignment
-        self.window_size = window_size
-        self.match_lower_bound = match_lower_bound
-
 def edit_conserved_regions(template_name, target_name, alignment_file,input_pdb, output_pdb, target_fasta_output,chainID="A", modelID=0 ):
+    print "EDIT_CONSERVED_REGIONS: start algorithm"
     alignment_data = prepare_alignment_data(alignment_file, target_name, template_name)
     template_fasta = alignment_data.template_fasta_alignment
     target_fasta = alignment_data.target_fasta_alignment
@@ -99,6 +76,8 @@ def edit_conserved_regions(template_name, target_name, alignment_file,input_pdb,
             residues_to_delete.remove(i)
     create_edited_pdb(residues_to_delete,renumber, input_pdb,output_pdb, chainID=chainID,model=modelID)
     create_lowercase_target_fasta_from_tta(target_fasta, target_fasta_output)
+    print "EDIT_CONSERVED_REGIONS: algorithm done"
+
 
 class SelectResidues(Select):
     def __init__(self, residues_id, chain_id):
@@ -160,4 +139,29 @@ def create_lowercase_target_fasta_from_tta(target_fasta, name):
     ff.write(fasta_out[1:])
     ff.close()
 
+
+class data(object):
+    def __init__(self, template_fasta_alignment, target_fasta_alignment, window_size, match_lower_bound ):
+        self.template_fasta_alignment = template_fasta_alignment
+        self.target_fasta_alignment = target_fasta_alignment
+        self.window_size = window_size
+        self.match_lower_bound = match_lower_bound
+
+
+def prepare_alignment_data(alignment_file_name, target_name, template_name):
+    import re
+    alignment_file = open(name = alignment_file_name, mode = 'r')
+    template_seq = 'x'
+    target_seq = 'x'
+    for line in alignment_file:
+        matched_temp = re.match('^'+template_name+' *([A-Za-z-]*) *', line)
+        matched_trgt = re.match('^'+target_name+' *([A-Za-z-]*) *', line)
+        if matched_temp:
+            template_seq += matched_temp.group(1)
+        if matched_trgt:
+            target_seq += matched_trgt.group(1)
+    alignment_file.close()
+    print "Template alignment length: " + str(len(template_seq)-1)
+    print "Target alignment length: " + str(len(target_seq)-1)
+    return data(template_seq, target_seq, None, None)
 

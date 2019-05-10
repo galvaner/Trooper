@@ -87,9 +87,11 @@ def pick_conserved_res_from_template_pdb(template_pdb, template_conserved_indica
     io.save( path + "conserved_regions.pdb", select=SelectResidues(template_conserved_indicator, chainID))
 
 def run_sliding_window(alignment_file_name, target_name, template_name, window_size, match_lower_bound, template_pdb_name, chainID, path):
+    print "SLIDING_WINDOW: running sliding window algorithm..."
     data = prepare_alignment_data(alignment_file_name, target_name, template_name)
     data = add_params_to_half_populated_data_object(data, window_size, match_lower_bound)
     indicator_array =  compute_conserved_regions(data)
     pick_conserved_res_from_template_pdb(template_pdb_name, indicator_array, chainID, path)
+    print "SLIDING_WINDOW: running sliding window algorithm finished."
 
 

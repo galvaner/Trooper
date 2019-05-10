@@ -12,11 +12,10 @@ import config
 import TemplateSelector
 import argparse
 import Helper
-import PredictSecondaryStructure
-import UseSecondTemplate
+import secondary_structure_predictor
+import multiple_templates_modul
 
 #cashe = {}
-run_on_windows = False
 
 
 
@@ -33,7 +32,7 @@ def connect_scripts(file_name):
         global bad_cache
         if line['template_fasta'] in bad_cache:
             continue
-        if(Helper.check_order_of_fasta_and_pdb('./template.pdb', line['template_chainID'], line['template_fasta'])):
+        if(Helper.is_fast_and_pdb_ordered_correctly('./template.pdb', line['template_chainID'], line['template_fasta'])):
             #global cashe
             #cashe[line['template_fasta']] = True
             if not line['target'] in used_target and not line['template'] in used_target and not line['template'] in used_template and not line['target'] in used_template:
@@ -60,8 +59,8 @@ def process_pair(pair):
     template = pair.split(' ')[1].split('.')[0]
     template_chainID = template.split('_')[1]
     template_pdb = "../pdbs/" + template.split('_')[0].lower() + ".pdb"
-    template_fasta = "../fastas/" + template + ".fasta"
-    target_fasta = "../fastas/" + target + ".fasta"
+    template_fasta = "../fastas/" + str.upper(template) + ".fasta"
+    target_fasta = "../fastas/" + str.upper(target) + ".fasta"
     dir = "../prediction/" + target + "_" + template + "/files/"
     return {"target": target, "template":template, "template_chainID":template_chainID, "template_pdb":template_pdb, "target_fasta":target_fasta, "template_fasta":template_fasta, "dir":dir }
 
@@ -118,9 +117,11 @@ def try_adding_ens(input_pdb, chainID, fasta):
 
 def shell_script_call():
     import subprocess
-    if run_on_windows:
+    if config.run_on_windows:
         # TODO: momentalne na win 10 nefunguje, a nedari sa mi identifikovat preco, pre ucely debugu zakomentovavam a spustam rucne vedla.
         # TODO: v buducnosti prepisat do Pythonu
+        #subprocess.call([config.pathToCygwin, './script.sh'], shell=True)
+        #import subprocess
         #subprocess.call([config.pathToCygwin, './script.sh'], shell=True)
         print Helper.bcolors.WARNING + "RUN './script.sh' manually"
     else:
@@ -135,7 +136,7 @@ def create_shell_script(target, template, pdb, chainID, dir_):
 
 def prepare_prediction(parsed_tt):
     try:
-        align.compute_emboss_alignment(parsed_tt['target_fasta'], parsed_tt['template_fasta'], parsed_tt['dir']+"emboss.aln")
+        align.compute_global_alignment(parsed_tt['target_fasta'], parsed_tt['template_fasta'], parsed_tt['dir'] + "emboss.aln")
         create_shell_script(parsed_tt["target"], parsed_tt["template"], parsed_tt["template_pdb"], parsed_tt["template_chainID"], parsed_tt['dir'])
         shell_script_call()
         sliding_window.run_sliding_window(parsed_tt['dir']+"tta.aln", parsed_tt["target"], parsed_tt["template"], config.configSlidingWindowSize, config.configSlidingWindowMinCoverage,
@@ -146,19 +147,25 @@ def prepare_prediction(parsed_tt):
         print("Target length = " + str(length))
         cut_spheres.cut_spheres(parsed_tt['dir']+"conserved_edited_regions.pdb", length, parsed_tt['dir']+'cut_spheres/', parsed_tt["template_chainID"], 2.7, 5)
         if config.predictSecondaryStructure:
-            secStrObject = PredictSecondaryStructure.RunSecStrPRediction(parsed_tt["target"], parsed_tt["template"], dir, run_on_windows) #  predict secondary structure
+            secStrObject = secondary_structure_predictor.RunSecStrPRediction(parsed_tt["target"], parsed_tt["template"], dir) #  predict secondary structure
         prepare_rosetta_script.prepare_rosetta_script(config.configNumberOFStructuresGeneratedByFARFAR, parsed_tt["template_chainID"], length, parsed_tt['dir'], secStrObject)
     except:
         print "prepare_prediction: ERROR catched!"
 
 
-def __prepare_prediction_for_single_target__(target):
-    #suitable_templates = TemplateSelector.SelectTemplate(target, run_on_windows=run_on_windows)
-    suitable_templates = ['3V7E_C', '4QK8_A', '4QK9_A']
+def __prepare_prediction_for_single_target__(target, template=None):
+    if template is None:
+        suitable_templates = TemplateSelector.SelectTemplate(target)
+    else:
+        suitable_templates = [template]
+    #suitable_templates = ['3V7E_C', '4QK8_A', '4QK9_A']
     if len(suitable_templates) == 0:
-        raise "No template found for " + target + " sequence"
+        raise Exception("No template found for " + target + " sequence")
     target_fasta = target
-    target_template_pairs = [target_fasta + " " + template + ".fasta" for template in suitable_templates]
+    if template is None:
+        target_template_pairs = [target_fasta + " " + template + ".fasta" for template in suitable_templates]
+    else:
+        target_template_pairs = [target_fasta + " " + template]
     prepared_target_template_pairs = [process_pair(pair) for pair in target_template_pairs]
     for i in xrange(len(prepared_target_template_pairs)):
         parsed_tt = prepared_target_template_pairs[i]
@@ -167,7 +174,7 @@ def __prepare_prediction_for_single_target__(target):
         # like prepare prediction but with possibility of multiple templates
         #if config.useMultipleTemplates:
         #try:
-        align.compute_emboss_alignment(parsed_tt['target_fasta'], parsed_tt['template_fasta'],
+        align.compute_global_alignment(parsed_tt['target_fasta'], parsed_tt['template_fasta'],
                                        parsed_tt['dir'] + "emboss.aln")
         create_shell_script(parsed_tt["target"], parsed_tt["template"], parsed_tt["template_pdb"],
                             parsed_tt["template_chainID"], parsed_tt['dir'])
@@ -177,6 +184,7 @@ def __prepare_prediction_for_single_target__(target):
                                           config.configSlidingWindowMinCoverage,
                                           parsed_tt['dir'] + "template.pdb", parsed_tt['template_chainID'],
                                           parsed_tt['dir'])
+
         edit_conserved_regions.edit_conserved_regions(parsed_tt['template'], parsed_tt['target'],
                                                       parsed_tt['dir'] + "tta.aln",
                                                       parsed_tt['dir'] + "conserved_regions.pdb",
@@ -185,19 +193,19 @@ def __prepare_prediction_for_single_target__(target):
                                                       parsed_tt["template_chainID"])
         length = get_target_length(parsed_tt['target_fasta'])
         print("Target length = " + str(length))
-        if config.predictSecondaryStructure:
-            secStrObject = PredictSecondaryStructure.RunSecStrPRediction(parsed_tt["target"],
-                                                                         parsed_tt["template"],
-                                                                         parsed_tt["dir"],
-                                                                         run_on_windows)  # predict secondary structure
+
         if config.useMultipleTemplates:
-            for j in xrange(len(suitable_templates)):
-                if j == i:
-                    continue
-                UseSecondTemplate.SecondTemplateUsage(parsed_tt['dir'] + "conserved_edited_regions.pdb"
-                                                      , parsed_tt['target']
-                                                      , suitable_templates[j]
-                                                      , parsed_tt["template_chainID"])
+            multiple_templates_modul.run_module(parsed_tt['dir'] + "conserved_edited_regions.pdb", parsed_tt['target'],
+                                                parsed_tt["template_chainID"])
+
+
+        secStrObject = None
+        if config.predictSecondaryStructure:
+            secStrObject = secondary_structure_predictor.RunSecStrPRediction(parsed_tt["target"],
+                                                                             parsed_tt["template"],
+                                                                             parsed_tt["dir"],
+                                                                             )  # predict secondary structure
+
         cut_spheres.cut_spheres(parsed_tt['dir'] + "conserved_edited_regions.pdb", length,
                                 parsed_tt['dir'] + 'cut_spheres/', parsed_tt["template_chainID"], 2.7, 5)
 
@@ -212,7 +220,6 @@ if config.predictListOfTargets:
     if config.singleTargetPredictionFromCmd:
         parser = argparse.ArgumentParser()
         parser.add_argument('-t', '--target')
-        parser.add_argument('-w', '--windows')
         args = vars(parser.parse_args())
         target = args["target"]
         run_on_windows = bool(args["windows"])
@@ -220,14 +227,19 @@ if config.predictListOfTargets:
     else:
         parser = argparse.ArgumentParser()
         parser.add_argument('-f', '--file')
-        parser.add_argument('-w', '--windows')
         args = vars(parser.parse_args())
         file = args["file"]
-        run_on_windows = bool(args["windows"])
         #todo: multi target prediction from file
         targets = open(file)
         for line in targets:
-            __prepare_prediction_for_single_target__(line)
+            line_splitted = line.split()
+            if line_splitted.count() == 1:
+                __prepare_prediction_for_single_target__(line_splitted[0], None)
+            else:
+                if line_splitted.count() == 2:
+                    __prepare_prediction_for_single_target__(line_splitted[0], line_splitted[1])
+                else:
+                    raise Exception("Invalid input file line: " + line + ". First lines hould be in 'target.fasta template.fasta format'.")
         targets.close()
 else:
     parser = argparse.ArgumentParser()

@@ -12,3 +12,4 @@ useMultipleTemplates=True
 predictListOfTargets=True # if false predict target-template pairs from txt (do not find best templates for target) (old style)
 singleTargetPredictionFromCmd=False  # read name of target fasta from command line and select template working only with predictListOfTargets
 pathToCygwin='C:\\cygwin64\\bin\\bash' # only relevant if running on windows
+run_on_windows=True
