@@ -233,10 +233,10 @@ if config.predictListOfTargets:
         targets = open(file)
         for line in targets:
             line_splitted = line.split()
-            if line_splitted.count() == 1:
+            if len(line_splitted) == 1:
                 __prepare_prediction_for_single_target__(line_splitted[0], None)
             else:
-                if line_splitted.count() == 2:
+                if len(line_splitted) == 2:
                     __prepare_prediction_for_single_target__(line_splitted[0], line_splitted[1])
                 else:
                     raise Exception("Invalid input file line: " + line + ". First lines hould be in 'target.fasta template.fasta format'.")
