@@ -25,7 +25,7 @@ done
 
 # copy prepared parts of .pdb files to newly created rosetta folder
 
-for filename in ./*/*/files/*/*.pdb; do 
+for filename in ./*/*/files/[pc]*/*.pdb; do
 	predictionDirname1=$(echo $filename | cut -f 2 -d '/')
 	predictionDirname2=$(echo $filename | cut -f 3 -d '/')
 	cd $predictionDirname1/$predictionDirname2
@@ -35,6 +35,7 @@ for filename in ./*/*/files/*/*.pdb; do
 	mkdir -p ./$dirname
 	cp ../../../$filename ./$dirname
 	cp ../../../../scripts/start_prediction.sh .
+	cp ../files/gaps/*.pdb ./$dirname
 	chmod +x start_prediction.sh
 	#rm $filename
 	cd ../../..

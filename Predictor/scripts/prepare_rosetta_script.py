@@ -30,6 +30,13 @@ def prepare_rosetta_script(structures_number, chainID, target_length, dir, secSt
         line = file.readline()
     '''last_residue_nm = int(file.readline())'''
     print excluded_gaps_array
+
+    # get another template pdbs for gaps
+    include_gap_files_string = ""
+    path_to_gap_pdbs = dir + "gaps/"
+    for gap_pdb in os.listdir(path_to_gap_pdbs):
+        include_gap_files_string += " " + gap_pdb
+
     # divide the whole sequence into smaller
     divide_into_smaller_seq_and_prepare_statements(excluded_gaps_array,
                                                    target_length,
@@ -41,6 +48,7 @@ def prepare_rosetta_script(structures_number, chainID, target_length, dir, secSt
                                                    dir+"prepared_statements.txt",
                                                    chainID,
                                                    0,
+                                                   include_gap_files_string,
                                                    secStrObject)
     prepare_statements_for_cut_spheres(dir+"prepared_statements.txt",
                                        "../target.fasta",
@@ -48,6 +56,7 @@ def prepare_rosetta_script(structures_number, chainID, target_length, dir, secSt
                                        dir+"cut_spheres/",
                                        chainID,
                                        0,
+                                       include_gap_files_string,
                                        secStrObject)
     print "PREPARE_ROSETTTA_SCRIPT: end"
 
@@ -74,6 +83,7 @@ def divide_into_smaller_seq_and_prepare_statements(excluded_gaps_array,
                                                    statement_file="../files/prepared_statements.txt",
                                                    chainID="A",
                                                    modelID=0,
+                                                   include_gap_files_string = "",
                                                    secStrObject = None):
     parser_pdb = PDBParser()
     structure = parser_pdb.get_structure('target', pdb_in)
@@ -107,10 +117,10 @@ def divide_into_smaller_seq_and_prepare_statements(excluded_gaps_array,
         first_gap = True
         if secStrObject is None:
             script_params = "rna_denovo_setup.py -fasta " + fasta_name + " -s " + str(section[0]) + "_" + str(
-                section[1]) + ".pdb -fixed_stems -nstruct " + str(
+                section[1]) + ".pdb " + include_gap_files_string + " -fixed_stems -nstruct " + str(
                 structures_to_generate) + " -working_res "
         else:
-            script_params = "rna_denovo_setup.py -fasta " + fasta_name + " -s " + str(section[0]) + "_" + str(section[1]) + ".pdb -fixed_stems -nstruct " + str(structures_to_generate) + " -secstruct_file ../secstruForRosetta.secstr" + " -working_res " # be aware that one shell scripts extract path from this file...
+            script_params = "rna_denovo_setup.py -fasta " + fasta_name + " -s " + str(section[0]) + "_" + str(section[1]) + ".pdb " + include_gap_files_string + " -fixed_stems -nstruct " + str(structures_to_generate) + " -secstruct_file ../secstruForRosetta.secstr" + " -working_res " # be aware that one shell scripts extract path from this file...
         workingResPairs = []
         last_gap = section
         for gap in excluded_gaps_array:
@@ -155,6 +165,7 @@ def prepare_statements_for_cut_spheres(statement_file="../files/prepared_stateme
                                        path_to_output_cut_spheres='../files/cut_spheres/',
                                        chainID='A',
                                        modelID=0,
+                                       include_gap_files_string = "",
                                        secStrObject = None): #prepare script calls for longer gaps created in script cut spheres
     array_index = 0
     file_for_statements = open(statement_file,'a')
@@ -175,10 +186,10 @@ def prepare_statements_for_cut_spheres(statement_file="../files/prepared_stateme
         first_cycle = True
         workingResPairs = []
         if secStrObject is None:
-            script_params = "rna_denovo_setup.py -fasta " + fasta + " -s " + input_pdb + " -fixed_stems -nstruct " + str(
+            script_params = "rna_denovo_setup.py -fasta " + fasta + " -s " + input_pdb + " " + include_gap_files_string + " -fixed_stems -nstruct " + str(
                 structures_to_generate) + " -working_res "
         else:
-            script_params = "rna_denovo_setup.py -fasta " + fasta + " -s " + input_pdb + " -fixed_stems -nstruct " + str(structures_to_generate) + " -secstruct_file ../secstruForRosetta.secstr" + " -working_res "
+            script_params = "rna_denovo_setup.py -fasta " + fasta + " -s " + input_pdb + " " + include_gap_files_string + " -fixed_stems -nstruct " + str(structures_to_generate) + " -secstruct_file ../secstruForRosetta.secstr" + " -working_res "
         for residue in chain:
             current = residue.id[1]
             if first_cycle:

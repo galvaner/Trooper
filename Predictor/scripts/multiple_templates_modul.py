@@ -47,8 +47,9 @@ class MultipleTemplateModul:
     MAX_GLOBAL_SIMILARITY_TO_ACCEPT_ALN = 93
     # if zero then there is gap on that index in target structure if 1 there is residue
     target_structure_gap_map = []
+    create_separate_files_for_gaps = True
 
-    def __init__(self, target_structure, target_name, target_structure_chain_id):
+    def __init__(self, target_structure, target_name, target_structure_chain_id, dir):
         """pdb file with path to fill long gaps, XXXX_X fasta name of target structure, chain_id of target_structure (usually from primary template)"""
         self.target_name = target_name
         self.target_structure_chain_id = target_structure_chain_id
@@ -57,6 +58,7 @@ class MultipleTemplateModul:
         self.target_fasta_seq = self.__get_target_fasta_seq__()
         self.gaps = []
         self.indexed_fastas = list()
+        self.dir = dir
 
     def identify_gaps_in_structure(self):
         """returns list of [from(including), till(including + 1), gapLength]"""
@@ -192,13 +194,16 @@ class MultipleTemplateModul:
             for gap in self.gaps:
                 try:
                     if gap.template_exists:
+                        gap_name = self.dir + 'gaps/' + str(gap.gap_from) + "_" + str(gap.gap_till) + ".pdb"
                         superposition.Merge(target_name=self.target_structure,
                                             template_name="../pdbs/" + str.lower(gap.template_name) + ".pdb",
                                             fill_gap_template_ids=gap.template_fill_gap_ids,
                                             target_connector_residue_ids=gap.target_connector_ids,
                                             template_connector_residue_ids=gap.template_connector_ids,
                                             template_chain_id=gap.template_chain_id,
-                                            target_chain_id=self.target_structure_chain_id)
+                                            target_chain_id=self.target_structure_chain_id,
+                                            create_separate_files_for_gaps=self.create_separate_files_for_gaps,
+                                            gap_name=gap_name)
                 except Exception as e:
                     print("ERROR in superposition.py: " + str(e))
 
@@ -249,10 +254,10 @@ def test_identify_gaps_in_structure(given_gaps):
     print "End... test_identify_gaps_in_structure"
 
 
-def run_module(target_structure, target_name, target_structure_chain_id):
+def run_module(target_structure, target_name, target_structure_chain_id, dir):
     print "MULTIPLE_TEMPLATES_MODULE: start"
     #mtm = MultipleTemplateModul("test_data/4znp.pdb", "4ZNP_B", "B")
-    mtm = MultipleTemplateModul(target_structure, target_name, target_structure_chain_id)
+    mtm = MultipleTemplateModul(target_structure, target_name, target_structure_chain_id, dir)
     mtm.index_fastas()
     identified_gaps = mtm.identify_gaps_in_structure()
     mtm.find_suitable_alignments_for_gaps()

@@ -10,3 +10,5 @@ Predictor_v2.0(with_secondary_struct)/scripts/test.py
 *.temp
 *.aln
 *.pyc
+*.fasta
+*.fasta

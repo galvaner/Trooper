@@ -25,7 +25,8 @@ def divide_files_into_folders(dir_name):
         handle.close()
 
 def move_to_folder(data): #data is list of [dir_name, filename , fasta, fasta length]
-    directories = [{"from":0, "till":90000, "folder":"fastasMod"}]#[{"from":0, "till":50, "folder":"0_50"}, {"from":51, "till":100, "folder":"51_100"}, {"from":101, "till":500, "folder":"101_500"}, {"from":501, "till":1000, "folder":"501_1000"}, {"from":1001, "till":2000, "folder":"1001_2000"}, {"from":2001, "till":10000, "folder":"2001_10000"}]
+    directories = [{"from":0, "till":50, "folder":"0_50"}, {"from":51, "till":100, "folder":"51_100"}, {"from":101, "till":500, "folder":"101_500"}, {"from":501, "till":1000, "folder":"501_1000"}, {"from":1001, "till":2000, "folder":"1001_2000"}, {"from":2001, "till":10000, "folder":"2001_10000"}]
+        #[{"from":0, "till":90000, "folder":"fastasMod"}]#[{"from":0, "till":50, "folder":"0_50"}, {"from":51, "till":100, "folder":"51_100"}, {"from":101, "till":500, "folder":"101_500"}, {"from":501, "till":1000, "folder":"501_1000"}, {"from":1001, "till":2000, "folder":"1001_2000"}, {"from":2001, "till":10000, "folder":"2001_10000"}]
     for dir in directories:
         if data[3] >= dir["from"] and data[3] <= dir["till"]:
             print data[2].id[:4] + "_" + data[2].id[5] + "    " + str(data[3]) + "     " + dir["folder"]
@@ -36,7 +37,16 @@ def move_to_folder(data): #data is list of [dir_name, filename , fasta, fasta le
             break
 
 def create_similarity_matrix():
-    directories = [  {"from":0, "till":50, "folder":"0_50"}]
+    # choose files from which you want to generate pairs
+    # very slow if all are chosen
+    directories = [
+        #{"from":0, "till":50, "folder":"0_50"},
+        {"from":51, "till":100, "folder":"51_100"}
+        #{"from":101, "till":500, "folder":"101_500"}
+        #{"from":501, "till":1000, "folder":"501_1000"},
+        #{"from":1001, "till":2000, "folder":"1001_2000"},
+        #{"from":2001, "till":10000, "folder":"2001_10000"}
+     ]
     for dir in directories:
         heatmap_state =  [[0 for i in range(4)] for j in range(4)]
         buckets_dictionary = {'30-45s0-15g':[],'30-45s15-30g':[],'30-45s30-45g':[],'30-45s45-60g':[],'45-60s0-15g':[],'45-60s15-30g':[],'45-60s30-45g':[],'45-60s45-60g':[],'60-75s0-15g':[],'60-75s15-30g':[],'60-75s30-45g':[],'60-75s45-60g':[],'75-90s0-15g':[],'75-90s15-30g':[],'75-90s30-45g':[],'75-90s45-60g':[] }
@@ -45,16 +55,19 @@ def create_similarity_matrix():
         for filename_row in os.listdir("fasta/" + dir["folder"]):
             row = {}
             for filename_column in os.listdir("fasta/" + dir["folder"]):
-                if filename_row == filename_column:
-                    row.update({101:filename_column})
-                    continue
-                emboss_result = compute_emboss_alignment("fasta/" + dir["folder"] + "/" + filename_row, "fasta/" + dir["folder"] + "/" + filename_column)
-                prepare_data_for_heatmap(heatmap_state, emboss_result[1], emboss_result[0], buckets_dictionary,filename_row, filename_column)
-                if emboss_result[0] in row:
-                    row[emboss_result[0]].append(filename_column)
-                else:
-                    row.update({emboss_result[0] : [emboss_result[1], filename_column]})
-                    #row.update({emboss_result : filename_column})
+                try:
+                    if filename_row == filename_column:
+                        row.update({101:filename_column})
+                        continue
+                    emboss_result = compute_emboss_alignment("fasta/" + dir["folder"] + "/" + filename_row, "fasta/" + dir["folder"] + "/" + filename_column)
+                    prepare_data_for_heatmap(heatmap_state, emboss_result[1], emboss_result[0], buckets_dictionary,filename_row, filename_column)
+                    if emboss_result[0] in row:
+                        row[emboss_result[0]].append(filename_column)
+                    else:
+                        row.update({emboss_result[0] : [emboss_result[1], filename_column]})
+                        #row.update({emboss_result : filename_column})
+                except Exception as e:
+                    print str(e)
             print >>f, collections.OrderedDict(sorted(row.items(),reverse=True))
             print collections.OrderedDict(sorted(row.items(),reverse=True))
         f.close()
@@ -98,7 +111,7 @@ def get_similarity_from_file(file_name):
 def prepare_data_for_heatmap(current_state, gap, similarity, buckets_dictionary, fasta1, fasta2):
     # current state is two dimensional array rows means similarity gap and columns similarity buckets
         #row 1
-    cell = [fasta1, fasta2]
+    cell = [fasta1[:4].upper() + fasta1[4:], fasta2[:4].upper() + fasta2[4:]]
     if 30 <= similarity < 45 and 0 <= gap < 15:
         current_state[0][0] = current_state[0][0] + 1
         buckets_dictionary['30-45s0-15g'].append(cell)
@@ -186,7 +199,7 @@ def create_heatmap(data):
 
 
 
-divide_files_into_folders("fasta")
+#divide_files_into_folders("fasta")
 #compute_emboss_alignment("fasta/51_100/5BTM_B.fasta","fasta/51_100/4ZNP_B.fasta")
-#create_similarity_matrix()
+create_similarity_matrix()
 

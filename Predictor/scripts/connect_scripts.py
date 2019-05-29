@@ -67,6 +67,7 @@ def process_pair(pair):
 def create_directories(target,  template):
         directories = []
         directories.append("../prediction/" + target + "_" + template + "/files/cut_spheres")
+        directories.append("../prediction/" + target + "_" + template + "/files/gaps")
         directories.append("../prediction/" + target + "_" + template + "/files/prepare_rosetta_scripts")
         directories.append("../prediction/" + target + "_" + template + "/results/predicted_parts")
         for dir in directories:
@@ -145,7 +146,7 @@ def prepare_prediction(parsed_tt):
                                ,parsed_tt['dir']+"conserved_edited_regions.pdb", parsed_tt['dir']+"target.fasta", parsed_tt["template_chainID"])
         length = get_target_length(parsed_tt['target_fasta'])
         print("Target length = " + str(length))
-        cut_spheres.cut_spheres(parsed_tt['dir']+"conserved_edited_regions.pdb", length, parsed_tt['dir']+'cut_spheres/', parsed_tt["template_chainID"], 2.7, 5)
+        cut_spheres.cut_spheres(parsed_tt['dir']+"conserved_edited_regions.pdb", length, parsed_tt['dir']+'cut_spheres/', parsed_tt["template_chainID"], 2.7, config.configMinGabLengthToOwnPrediction)
         if config.predictSecondaryStructure:
             secStrObject = secondary_structure_predictor.RunSecStrPRediction(parsed_tt["target"], parsed_tt["template"], dir) #  predict secondary structure
         prepare_rosetta_script.prepare_rosetta_script(config.configNumberOFStructuresGeneratedByFARFAR, parsed_tt["template_chainID"], length, parsed_tt['dir'], secStrObject)
@@ -171,49 +172,47 @@ def __prepare_prediction_for_single_target__(target, template=None):
         parsed_tt = prepared_target_template_pairs[i]
         print("**********template***********" + parsed_tt['template'] + "***********target**********" + parsed_tt['target'])
         create_directories(parsed_tt['target'], parsed_tt['template'])
-        # like prepare prediction but with possibility of multiple templates
-        #if config.useMultipleTemplates:
-        #try:
-        align.compute_global_alignment(parsed_tt['target_fasta'], parsed_tt['template_fasta'],
-                                       parsed_tt['dir'] + "emboss.aln")
-        create_shell_script(parsed_tt["target"], parsed_tt["template"], parsed_tt["template_pdb"],
-                            parsed_tt["template_chainID"], parsed_tt['dir'])
-        shell_script_call()
-        sliding_window.run_sliding_window(parsed_tt['dir'] + "tta.aln", parsed_tt["target"],
-                                          parsed_tt["template"], config.configSlidingWindowSize,
-                                          config.configSlidingWindowMinCoverage,
-                                          parsed_tt['dir'] + "template.pdb", parsed_tt['template_chainID'],
-                                          parsed_tt['dir'])
+        try:
+            align.compute_global_alignment(parsed_tt['target_fasta'], parsed_tt['template_fasta'],
+                                           parsed_tt['dir'] + "emboss.aln")
+            create_shell_script(parsed_tt["target"], parsed_tt["template"], parsed_tt["template_pdb"],
+                                parsed_tt["template_chainID"], parsed_tt['dir'])
+            shell_script_call()
+            sliding_window.run_sliding_window(parsed_tt['dir'] + "tta.aln", parsed_tt["target"],
+                                              parsed_tt["template"], config.configSlidingWindowSize,
+                                              config.configSlidingWindowMinCoverage,
+                                              parsed_tt['dir'] + "template.pdb", parsed_tt['template_chainID'],
+                                              parsed_tt['dir'])
 
-        edit_conserved_regions.edit_conserved_regions(parsed_tt['template'], parsed_tt['target'],
-                                                      parsed_tt['dir'] + "tta.aln",
-                                                      parsed_tt['dir'] + "conserved_regions.pdb",
-                                                      parsed_tt['dir'] + "conserved_edited_regions.pdb",
-                                                      parsed_tt['dir'] + "target.fasta",
-                                                      parsed_tt["template_chainID"])
-        length = get_target_length(parsed_tt['target_fasta'])
-        print("Target length = " + str(length))
+            edit_conserved_regions.edit_conserved_regions(parsed_tt['template'], parsed_tt['target'],
+                                                          parsed_tt['dir'] + "tta.aln",
+                                                          parsed_tt['dir'] + "conserved_regions.pdb",
+                                                          parsed_tt['dir'] + "conserved_edited_regions.pdb",
+                                                          parsed_tt['dir'] + "target.fasta",
+                                                          parsed_tt["template_chainID"])
+            length = get_target_length(parsed_tt['target_fasta'])
+            print("Target length = " + str(length))
 
-        if config.useMultipleTemplates:
-            multiple_templates_modul.run_module(parsed_tt['dir'] + "conserved_edited_regions.pdb", parsed_tt['target'],
-                                                parsed_tt["template_chainID"])
+            if config.useMultipleTemplates:
+                multiple_templates_modul.run_module(parsed_tt['dir'] + "conserved_edited_regions.pdb", parsed_tt['target'],
+                                                    parsed_tt["template_chainID"], parsed_tt['dir'])
 
 
-        secStrObject = None
-        if config.predictSecondaryStructure:
-            secStrObject = secondary_structure_predictor.RunSecStrPRediction(parsed_tt["target"],
-                                                                             parsed_tt["template"],
-                                                                             parsed_tt["dir"],
-                                                                             )  # predict secondary structure
+            secStrObject = None
+            if config.predictSecondaryStructure:
+                secStrObject = secondary_structure_predictor.RunSecStrPRediction(parsed_tt["target"],
+                                                                                 parsed_tt["template"],
+                                                                                 parsed_tt["dir"],
+                                                                                 )  # predict secondary structure
 
-        cut_spheres.cut_spheres(parsed_tt['dir'] + "conserved_edited_regions.pdb", length,
-                                parsed_tt['dir'] + 'cut_spheres/', parsed_tt["template_chainID"], 2.7, 5)
+            cut_spheres.cut_spheres(parsed_tt['dir'] + "conserved_edited_regions.pdb", length,
+                                    parsed_tt['dir'] + 'cut_spheres/', parsed_tt["template_chainID"], 2.7, config.configMinGabLengthToOwnPrediction)
 
-        prepare_rosetta_script.prepare_rosetta_script(config.configNumberOFStructuresGeneratedByFARFAR,
-                                                      parsed_tt["template_chainID"], length, parsed_tt['dir'],
-                                                      secStrObject)
-        #except:
-        #    print "prepare_prediction: ERROR catched!"
+            prepare_rosetta_script.prepare_rosetta_script(config.configNumberOFStructuresGeneratedByFARFAR,
+                                                          parsed_tt["template_chainID"], length, parsed_tt['dir'],
+                                                          secStrObject)
+        except Exception as e:
+            print Helper.bcolors.FAIL + "prepare_prediction: ERROR catched with error: " + str(e) + Helper.bcolors.OKBLUE
 
 
 if config.predictListOfTargets:

@@ -8,7 +8,7 @@
 
 #call python script and give him chainID as parameter
 
-module add python-2.7.10-gcc python-2.7.10-intel
+#module add python-2.7.10-gcc python-2.7.10-intel
 module add python27-modules-gcc
 #module add emboss-6.5.7
 
@@ -30,8 +30,9 @@ done
 
 #compute RMDS using pymol
 
-module add pymol-1.7.6-gcc
-module add pymol-1.8.2.1-gcc
+#module add pymol-1.7.6-gcc
+#module add pymol-1.8.2.1-gcc
+module add pymol-1.8.2.1-gcc debian8-compat
 
 for D in `find ../prediction/*/*/results/ -maxdepth 0 -mindepth 0 -type d`
 do
