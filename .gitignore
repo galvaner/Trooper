@@ -4,11 +4,6 @@ Predictor_v2.0(with_secondary_struct)/scripts/.idea/misc.xml
 Predictor_v2.0(with_secondary_struct)/scripts/.idea/modules.xml
 Predictor_v2.0(with_secondary_struct)/scripts/.idea/scripts.iml
 Predictor_v2.0(with_secondary_struct)/scripts/test.py
-*.fasta
-*.pdb
-*.secstr
 *.temp
 *.aln
 *.pyc
-*.fasta
-*.fasta
