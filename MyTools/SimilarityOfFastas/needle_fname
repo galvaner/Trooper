@@ -1,0 +1,42 @@
+########################################
+# Program: needle
+# Rundate: Thu 23 May 2019 00:59:17
+# Commandline: needle
+#    -outfile needle_fname
+#    -asequence fasta/51_100/5fk3_A.fasta
+#    -bsequence fasta/51_100/5fk1_A.fasta
+#    -gapopen 10
+#    -gapextend 0.5
+# Align_format: srspair
+# Report_file: needle_fname
+########################################
+
+#=======================================
+#
+# Aligned_sequences: 2
+# 1: SEQUENCE
+# 2: SEQUENCE
+# Matrix: EDNAFULL
+# Gap_penalty: 10.0
+# Extend_penalty: 0.5
+#
+# Length: 94
+# Identity:      92/94 (97.9%)
+# Similarity:    92/94 (97.9%)
+# Gaps:           0/94 ( 0.0%)
+# Score: 452.0
+# 
+#
+#=======================================
+
+SEQUENCE           1 GGCUUAUCAAGAGAGGGCGAGCGACUGGCGCGAAGACCCCCGGCAACCAG     50
+                     |||||||||||||||||.||||||||||||||||||.|||||||||||||
+SEQUENCE           1 GGCUUAUCAAGAGAGGGGGAGCGACUGGCGCGAAGAUCCCCGGCAACCAG     50
+
+SEQUENCE          51 AAAUGGUGCCAAUUCCUGCAGCGGAAACGUUGAAAGAUGAGCCG     94
+                     ||||||||||||||||||||||||||||||||||||||||||||
+SEQUENCE          51 AAAUGGUGCCAAUUCCUGCAGCGGAAACGUUGAAAGAUGAGCCG     94
+
+
+#---------------------------------------
+#---------------------------------------

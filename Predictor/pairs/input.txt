@@ -1,2 +1,0 @@
-3BBV_z.fasta
-4TNA_A.fasta

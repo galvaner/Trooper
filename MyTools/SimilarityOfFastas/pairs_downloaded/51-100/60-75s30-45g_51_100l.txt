@@ -1,0 +1,8 @@
+4JRC_A.fasta 4MGN_A.fasta
+4JRC_A.fasta 4MGN_C.fasta
+4JRC_B.fasta 4MGN_A.fasta
+4JRC_B.fasta 4MGN_C.fasta
+4MGN_A.fasta 4JRC_A.fasta
+4MGN_A.fasta 4JRC_B.fasta
+4MGN_C.fasta 4JRC_A.fasta
+4MGN_C.fasta 4JRC_B.fasta

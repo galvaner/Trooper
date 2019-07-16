@@ -146,7 +146,7 @@ def prepare_prediction(parsed_tt):
                                ,parsed_tt['dir']+"conserved_edited_regions.pdb", parsed_tt['dir']+"target.fasta", parsed_tt["template_chainID"])
         length = get_target_length(parsed_tt['target_fasta'])
         print("Target length = " + str(length))
-        cut_spheres.cut_spheres(parsed_tt['dir']+"conserved_edited_regions.pdb", length, parsed_tt['dir']+'cut_spheres/', parsed_tt["template_chainID"], 2.7, config.configMinGabLengthToOwnPrediction)
+        cut_spheres.cut_spheres(parsed_tt['dir']+"conserved_edited_regions.pdb", length, parsed_tt['dir']+'cut_spheres/', parsed_tt["template_chainID"], 2.7, 1000) #config.configMinGabLengthToOwnPrediction)
         if config.predictSecondaryStructure:
             secStrObject = secondary_structure_predictor.RunSecStrPRediction(parsed_tt["target"], parsed_tt["template"], dir) #  predict secondary structure
         prepare_rosetta_script.prepare_rosetta_script(config.configNumberOFStructuresGeneratedByFARFAR, parsed_tt["template_chainID"], length, parsed_tt['dir'], secStrObject)
@@ -204,9 +204,12 @@ def __prepare_prediction_for_single_target__(target, template=None):
                                                                                  parsed_tt["template"],
                                                                                  parsed_tt["dir"],
                                                                                  )  # predict secondary structure
-
+            gap_len = config.configMinGabLengthToOwnPrediction
+            if config.useMultipleTemplates:
+                gap_len = 100000  # hotfix turn cut spheres off when using multiple templates - TODO: fix it
+            
             cut_spheres.cut_spheres(parsed_tt['dir'] + "conserved_edited_regions.pdb", length,
-                                    parsed_tt['dir'] + 'cut_spheres/', parsed_tt["template_chainID"], 2.7, config.configMinGabLengthToOwnPrediction)
+                                    parsed_tt['dir'] + 'cut_spheres/', parsed_tt["template_chainID"], 2.7, gap_len) #config.configMinGabLengthToOwnPrediction)
 
             prepare_rosetta_script.prepare_rosetta_script(config.configNumberOFStructuresGeneratedByFARFAR,
                                                           parsed_tt["template_chainID"], length, parsed_tt['dir'],

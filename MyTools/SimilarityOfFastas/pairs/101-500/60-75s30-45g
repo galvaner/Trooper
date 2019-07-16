@@ -1,0 +1,8 @@
+1H1K_I.fasta 1H1K_J.fasta
+1H1K_I.fasta 1H1K_K.fasta
+1H1K_J.fasta 1H1K_I.fasta
+1H1K_K.fasta 1H1K_I.fasta
+1H1K_L.fasta 1H1K_M.fasta
+1H1K_L.fasta 1H1K_N.fasta
+1H1K_M.fasta 1H1K_L.fasta
+1H1K_N.fasta 1H1K_L.fasta
